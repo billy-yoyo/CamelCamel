@@ -30,7 +30,7 @@ function tile() {
 export class GameService {
     async getGame(id: string): Promise<Game> {
         const game = await gameRepo.get(id);
-        
+
         if (game && new Date().getTime() > game.lifetime) {
             gameRepo.set(id, undefined);
             return undefined;
@@ -46,13 +46,13 @@ export class GameService {
 
     async createGame(): Promise<Game> {
         const id = await randomId(
-            GAME_ID_ALPHABET, 
-            4, 
+            GAME_ID_ALPHABET,
+            4,
             async (id) => !(await this.gameExists(id))
         );
 
         const game = new Game(
-            id, 
+            id,
             new GameState('creating', undefined, [
                 [money(),          tile(), tile(),           deliver('grey'),  tile(),          tile(), money()],
                 [tile(),           tile(), tile(),           tile(),           tile(),          tile(), tile()],
@@ -61,7 +61,7 @@ export class GameService {
                 [tile(),           tile(), tile(),           deliver('brown'), tile(),          tile(), tile()],
                 [tile(),           tile(), tile(),           tile(),           tile(),          tile(), tile()],
                 [money(),          tile(), tile(),           deliver('pink'),  tile(),          tile(), money()],
-            ], []), 
+            ], []),
             new Date().getTime() + GAME_LIFETIME,
             [],
             0
@@ -104,14 +104,14 @@ export class GameService {
             if (game.players.length === 0) {
                 return false;
             }
-            
+
             game.state.mode = 'playing';
             game.state.turn = new Turn(
                 game.players[0].id,
                 4,
                 []
             );
-            
+
             game.version++;
             await gameRepo.set(game.id, game);
             return true;

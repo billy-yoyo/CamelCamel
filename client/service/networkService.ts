@@ -20,7 +20,7 @@ interface ResponseError {
 
 interface Response<T> {
     data?: T;
-    error?: ResponseError; 
+    error?: ResponseError;
 }
 
 function attemptJSON(data: string): any {
@@ -109,7 +109,7 @@ export async function startGame(gameId: string): Promise<Response<Success>> {
         method: 'post',
         path: `/game/${gameId}/start`,
         template: TSuccess
-    }); 
+    });
 }
 
 export async function performAction(gameId: string, playerId: string, action: Action): Promise<Response<RemainingActions>> {
@@ -118,7 +118,7 @@ export async function performAction(gameId: string, playerId: string, action: Ac
         path: `/game/${gameId}/action/${playerId}`,
         data: TAction.toTransit(action),
         template: TRemainingActions
-    }); 
+    });
 }
 
 export async function shouldUpdate(gameId: string): Promise<Response<Update>> {

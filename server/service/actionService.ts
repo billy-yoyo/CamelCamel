@@ -52,9 +52,9 @@ export class ActionService {
         if (camels.every(camel => camel.carrying !== undefined)) {
             return { message: `All camels belonging to player ${player.id} at tile {x: ${data.from.x}, y: ${data.from.y}} are carrying a resource` };
         }
-        
-        return { 
-            cost: toTile.camels.length === 0 ? 1 : 2, 
+
+        return {
+            cost: toTile.camels.length === 0 ? 1 : 2,
             executor: () => {
                 const index = fromTile.camels.findIndex(camel => camel.colour === player.colour && camel.carrying === undefined);
                 const camel = fromTile.camels.splice(index, 1)[0];
@@ -65,7 +65,7 @@ export class ActionService {
 
     performPickupAction(game: Game, player: Player, data: PickupData): ActionResult {
         const tile = this.findTile(game, data.tile);
-        if (!tile) { 
+        if (!tile) {
             return { message: `Invalid tile {x: ${data.tile.x}, y: ${data.tile.y}}` };
         }
 
@@ -101,7 +101,7 @@ export class ActionService {
 
     performPlaceAction(game: Game, player: Player, data: PlaceData): ActionResult {
         const tile = this.findTile(game, data.tile);
-        if (!tile) { 
+        if (!tile) {
             return { message: `Invalid tile {x: ${data.tile.x}, y: ${data.tile.y}}` };
         }
 
@@ -119,8 +119,8 @@ export class ActionService {
             return { message: `All of ${player.id}'s camels are already on the board` };
         }
 
-        return { 
-            cost: tile.camels.length === 0 ? 1 : 2, 
+        return {
+            cost: tile.camels.length === 0 ? 1 : 2,
             executor: () => {
                 tile.camels.push({colour: player.colour, carrying: undefined});
             }
@@ -138,7 +138,7 @@ export class ActionService {
         if (!toTile) {
             return { message: `Invalid to tile {x: ${data.to.x}, y: ${data.to.y}}` };
         }
-        
+
         const fromCamel = fromTile.camels.find(camel => camel.colour === player.colour && camel.carrying === data.resource);
         const toCamel = toTile.camels.find(camel => camel.colour === player.colour && camel.carrying === undefined);
 

@@ -2,13 +2,13 @@ import redis from 'redis';
 import { promisify } from 'util';
 import { Template } from 'tsplate';
 
-const client = redis.createClient();
-const clientGet = promisify(client.get);
-const clientSet = promisify(client.set);
+//const client = redis.createClient();
+const clientGet = async (key: string): Promise<any> => {}; //promisify(client.get);
+const clientSet = async (key: string, value: any) => {}; // promisify(client.set);
 
-client.on("error", function(error) {
+/*client.on("error", function(error) {
   console.error(error);
-});
+});*/
 
 export class Store {
     async get<V>(key: string, template: Template<V, any>): Promise<V | undefined> {
@@ -37,7 +37,7 @@ export class TemplateStore<V> {
     private store: Store;
     private template: Template<V, any>;
     private prefix: string;
-    
+
     constructor(store: Store, template: Template<V, any>, prefix: string) {
         this.store = store;
         this.template = template;

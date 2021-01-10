@@ -4,7 +4,7 @@ export function chooseLetter(alphabet: string) {
 }
 
 export async function randomId(alphabet: string, length: number, validator?: (id: string) => Promise<boolean>): Promise<string> {
-    let id: string = undefined;
+    let id: string;
     let valid: boolean = false;
     while (!valid) {
         id = new Array(length).fill(0).map(() => chooseLetter(alphabet)).join('');

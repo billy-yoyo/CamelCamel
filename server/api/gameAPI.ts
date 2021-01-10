@@ -111,7 +111,7 @@ router.get('/:gameId/updated', async (req, res) => {
     if (!game) {
         return errors.notFound(res, `No game with id ${req.params.gameId} found`);
     }
-    
+
     return res.json({ update: game.version !== version });
 });
 
