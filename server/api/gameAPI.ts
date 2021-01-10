@@ -29,7 +29,7 @@ router.get('/:gameId', async (req, res) => {
     res.json(TGame.toTransit(game));
 });
 
-router.post('/create', async (req, res) => {
+router.post('/', async (req, res) => {
     const game = await gameService.createGame();
 
     res.json(TGame.toTransit(game));
