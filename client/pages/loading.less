@@ -1,0 +1,24 @@
+@import '../styles/_index.less';
+
+
+@keyframes rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+.loading .camel {
+    animation: rotating 5s linear infinite;
+}
+
+.loading .text {
+    margin-top: 50px;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: @primary;
+}
