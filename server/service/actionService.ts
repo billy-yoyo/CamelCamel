@@ -1,10 +1,9 @@
-import { Action, MoveData, PickupData, PlaceData, TMoveData, TPickupData, TPlaceData, TransportData, TTransportData } from "../../common/model/game/action";
+import { Action, MoveData, PickupData, PlaceData, StealData, TMoveData, TPickupData, TPlaceData, TransportData, TStealData, TTransportData } from "../../common/model/game/action";
 import { Delivery } from "../../common/model/game/delivery";
 import { Game } from "../../common/model/game/game";
 import { GameTile } from "../../common/model/game/gameTile";
 import { Player } from "../../common/model/game/player";
 import { PlayerColour } from "../../common/model/game/playerColour";
-import gameService from "./gameService";
 
 const MAX_CAMELS = 5;
 
@@ -122,7 +121,7 @@ export class ActionService {
         return {
             cost: tile.camels.length === 0 ? 1 : 2,
             executor: () => {
-                tile.camels.push({colour: player.colour, carrying: undefined});
+                tile.camels.push({colour: player.colour, carrying: undefined, isResourceSafe: false});
             }
         };
     }
@@ -154,11 +153,41 @@ export class ActionService {
             cost: 1,
             executor: () => {
                 fromCamel.carrying = undefined;
+                fromCamel.isResourceSafe = false;
                 if (toTile.deliver === data.resource) {
                     game.state.deliveries.push(new Delivery(player.id, data.resource, 0));
                 } else {
                     toCamel.carrying = data.resource;
+                    toCamel.isResourceSafe = false;
                 }
+            }
+        }
+    }
+
+    performStealAction(game: Game, player: Player, data: StealData): ActionResult {
+        const tile = this.findTile(game, data.tile);
+
+        if (!tile) {
+            return { message: `Invalid tile {x: ${data.tile.x}, y: ${data.tile.y}}` };
+        }
+
+        const targetCamel = tile.camels.find(camel => camel.colour === data.targetColour && camel.carrying === data.targetResource && !camel.isResourceSafe);
+        const receivingCamel = tile.camels.find(camel => camel.colour === player.colour && camel.carrying === undefined);
+
+        if (!targetCamel) {
+            return { message: `No camel of colour ${data.targetColour} carrying resource ${data.targetResource} is at {x: ${data.tile.x}, y: ${data.tile.y}} to steal from` };
+        }
+
+        if (!receivingCamel) {
+            return { message: `No camel belonging to ${player.id} carrying no resource at {x: ${data.tile.x}, y: ${data.tile.y}}` };
+        }
+
+        return {
+            cost: 1,
+            executor: () => {
+                receivingCamel.carrying = targetCamel.carrying;
+                targetCamel.carrying = undefined;
+                receivingCamel.isResourceSafe = true;
             }
         }
     }
@@ -188,6 +217,12 @@ export class ActionService {
             }
 
             return this.performTransportAction(game, player, TTransportData.toModel(action.data));
+        } else if (action.type === 'steal') {
+            if (!TStealData.valid(action.data)) {
+                return { message: `Invalid steal data` };
+            }
+
+            return this.performStealAction(game, player, TStealData.toModel(action.data));
         }
 
         // should be impossible

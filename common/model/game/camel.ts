@@ -2,7 +2,7 @@ import T from "tsplate";
 import { PlayerColour, TPlayerColour } from "./playerColour";
 import { Resource, TResource } from "./resource";
 
-@T.constructor("colour", "carrying")
+@T.constructor("colour", "carrying", "isResourceSafe")
 export class Camel {
     @T.template(TPlayerColour)
     public colour: PlayerColour;
@@ -10,9 +10,13 @@ export class Camel {
     @T.template(TResource)
     public carrying: Resource;
 
-    constructor(colour: PlayerColour, carrying: Resource) {
+    @T.template(T.Boolean)
+    public isResourceSafe: boolean;
+
+    constructor(colour: PlayerColour, carrying: Resource, isResourceSafe: boolean) {
         this.colour = colour;
         this.carrying = carrying;
+        this.isResourceSafe = isResourceSafe;
     }
 }
 

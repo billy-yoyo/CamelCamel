@@ -1,5 +1,6 @@
 import T, { Template, ModelType } from "tsplate";
 import { ActionType, TActionType } from "./actionType";
+import { TPlayerColour } from "./playerColour";
 import { TResource } from "./resource";
 
 
@@ -16,6 +17,9 @@ export type MoveData = ModelType<typeof TMoveData>;
 
 export const TTransportData = T.Object({from: TPoint, to: TPoint, resource: TResource});
 export type TransportData = ModelType<typeof TTransportData>;
+
+export const TStealData = T.Object({tile: TPoint, targetColour: TPlayerColour, targetResource: TResource});
+export type StealData = ModelType<typeof TStealData>;
 
 export type ActionData = PickupData | PlaceData | MoveData | TransportData;
 

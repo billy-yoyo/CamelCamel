@@ -15,15 +15,19 @@ const GAME_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const GAME_LIFETIME = 86400000;
 
 function deliver(deliver: Resource) {
-    return new GameTile([], undefined, deliver, 0);
+    return new GameTile([], undefined, deliver, 0, 0);
 }
 
-function money() {
-    return new GameTile([], undefined, undefined, 1);
+function money(c: number) {
+    return new GameTile([], undefined, undefined, c, 1);
+}
+
+function spawn(c: number) {
+    return new GameTile([], undefined, undefined, c, 0);
 }
 
 function tile() {
-    return new GameTile([], undefined, undefined, 0);
+    return new GameTile([], undefined, undefined, 0, 0);
 }
 
 
@@ -50,17 +54,18 @@ export class GameService {
             4,
             async (id) => !(await this.gameExists(id))
         );
-
+        
+        let c = 1;
         const game = new Game(
             id,
             new GameState('creating', undefined, [
-                [money(),          tile(), tile(),           deliver('grey'),  tile(),          tile(), money()],
-                [tile(),           tile(), tile(),           tile(),           tile(),          tile(), tile()],
-                [tile(),           tile(), tile(),           deliver('red'),   tile(),          tile(), tile()],
-                [deliver('green'), tile(), deliver('white'), tile(),           deliver('blue'), tile(), deliver('purple')],
-                [tile(),           tile(), tile(),           deliver('brown'), tile(),          tile(), tile()],
-                [tile(),           tile(), tile(),           tile(),           tile(),          tile(), tile()],
-                [money(),          tile(), tile(),           deliver('pink'),  tile(),          tile(), money()],
+                [money(c++),       tile(),     tile(),           deliver('grey'),  tile(),          tile(),     money(c++)],
+                [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
+                [tile(),           tile(),     tile(),           deliver('red'),   tile(),          tile(),     tile()],
+                [deliver('green'), tile(),     deliver('white'), tile(),           deliver('blue'), tile(),     deliver('purple')],
+                [tile(),           tile(),     tile(),           deliver('brown'), tile(),          tile(),     tile()],
+                [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
+                [money(c++),       tile(),     tile(),           deliver('pink'),  tile(),          tile(),     money(c++)],
             ], []),
             new Date().getTime() + GAME_LIFETIME,
             [],
