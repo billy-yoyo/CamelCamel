@@ -4,7 +4,7 @@ import gameAPI from './api/gameAPI';
 import * as bodyParser from 'body-parser';
 
 const app = express();
-const port = 8181;
+const port = process.env.PORT || 8181;
 
 app.use(bodyParser.json());
 
