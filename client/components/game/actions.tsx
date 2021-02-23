@@ -1,22 +1,35 @@
 import * as React from 'react';
 import { ActionType } from '../../../common/model/game/actionType';
 import { GameTile } from '../../../common/model/game/gameTile';
+import { Hub } from '../../util/hub';
+import { GameQuery, GameQueryBuilder } from '../../util/query';
 import ActionButton from './actionButton';
 import './actions.less';
 
 interface ActionsProps {
+    hub: Hub;
     tile: GameTile;
+    pos: { x: number, y: number }
+    queryBuilder: GameQueryBuilder;
 }
 
-export default ({ tile }: ActionsProps): JSX.Element => {
+export default ({ hub, tile, pos, queryBuilder }: ActionsProps): JSX.Element => {
     const [processing, setProcessing] = React.useState<ActionType>();
     const actions: ActionType[] = ['place', 'move', 'pickup', 'steal', 'transport'];
 
     return (
         <div className="actions">
             {
-                actions.map(action => (
-                    <ActionButton tile={tile} action={action} processing={processing} setProcessing={setProcessing}></ActionButton>
+                actions.map((action, i) => (
+                    <ActionButton
+                      hub={hub}
+                      pos={pos}
+                      tile={tile}
+                      action={action}
+                      processing={processing}
+                      setProcessing={setProcessing}
+                      queryBuilder={queryBuilder}
+                      key={i} />
                 ))
             }
         </div>

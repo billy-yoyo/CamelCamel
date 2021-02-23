@@ -18,9 +18,9 @@ interface BoardRowProps {
 
 const BoardRow = ({ row, y, selected, setSelected }: BoardRowProps): JSX.Element => {
     return (
-        <div className="board-row">
+        <div className="board-row" key={y}>
             {
-                row.map((tile, x) => <Tile tile={tile} x={x} y={y} selected={selected} setSelected={setSelected}></Tile>)
+                row.map((tile, x) => <Tile tile={tile} x={x} y={y} selected={selected} setSelected={setSelected} key={`${x}:${y}`} />)
             }
         </div>
     )
@@ -31,7 +31,7 @@ export default ({ tiles, selected, setSelected }: BoardProps): JSX.Element => {
     return (
         <div className="board">
             {
-                tiles.map((row, y) => <BoardRow row={row} y={y} selected={selected} setSelected={setSelected}></BoardRow>)
+                tiles.map((row, y) => <BoardRow row={row} y={y} selected={selected} setSelected={setSelected} key={y} />)
             }
         </div>
     )

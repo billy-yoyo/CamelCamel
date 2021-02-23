@@ -57,11 +57,11 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
 
                 {
                     tile.camels.map(camel => (
-                        <Camel camel={camel}></Camel>
+                        <Camel camel={camel} key={`${camel.colour}:${camel.carrying}:${camel.isResourceSafe}`}></Camel>
                     ))
                 }
             </div>
-            
+
         </div>
     )
 };

@@ -10,7 +10,8 @@ const MAX_CAMELS = 5;
 interface ActionResult {
     message?: string;
     cost?: number;
-    executor?: () => void;
+    // returns whether or not the game should end as a result of this action
+    executor?: () => boolean;
 }
 
 export class ActionService {
@@ -28,6 +29,45 @@ export class ActionService {
 
     private findCamels(tile: GameTile, colour: PlayerColour) {
         return tile.camels.filter(camel => camel.colour === colour);
+    }
+
+    private hasPath(game: Game, from: {x: number, y: number}, to: {x: number, y: number}, colour: PlayerColour): boolean {
+        const tiles = game.state.tiles;
+        const hasCamel = ({ x, y }: {x: number, y: number}) => this.findCamels(tiles[y][x], colour).length > 0
+
+        if (!hasCamel(from)) {
+            return false;
+        }
+
+        const visited: {[key: string]: boolean} = {}
+        const visit = ({ x, y }: {x: number, y: number}) => {
+            visited[`${x}:${y}`] = true;
+        };
+        const hasVisited = ({ x, y }: {x: number, y: number}) => visited[`${x}:${y}`];
+        const offsets: [number, number][] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        visit(from);
+        let stack: {x: number, y: number}[] = [from];
+        let found = false;
+        while (!found && stack.length > 0) {
+            const newStack: {x: number, y: number}[] = [];
+            stack.forEach(tile => {
+                offsets.forEach(([ox, oy]) => {
+                    const otile = { x: tile.x + ox, y: tile.y + oy };
+                    if (!hasVisited(otile) && hasCamel(otile)) {
+                        if (otile.x === to.x && otile.y === to.y) {
+                            found = true;
+                        } else {
+                            visit(otile);
+                            newStack.push(otile);
+                        }
+                    }
+                });
+            });
+            stack = newStack;
+        }
+
+        return found;
     }
 
 
@@ -56,8 +96,9 @@ export class ActionService {
             cost: toTile.camels.length === 0 ? 1 : 2,
             executor: () => {
                 const index = fromTile.camels.findIndex(camel => camel.colour === player.colour && camel.carrying === undefined);
-                const camel = fromTile.camels.splice(index, 1)[0];
-                toTile.camels.push(camel);
+                const targetCamel = fromTile.camels.splice(index, 1)[0];
+                toTile.camels.push(targetCamel);
+                return false;
             }
         };
     }
@@ -92,8 +133,9 @@ export class ActionService {
                     tile.money = 0;
                 }
 
-                const camel = tile.camels.find(camel => camel.colour === player.colour && camel.carrying === undefined);
-                camel.carrying = resource;
+                const targetCamel = tile.camels.find(camel => camel.colour === player.colour && camel.carrying === undefined);
+                targetCamel.carrying = resource;
+                return false;
             }
         };
     }
@@ -106,8 +148,8 @@ export class ActionService {
 
         // count number of camels belonging to player
         let count = 0;
-        game.state.tiles.forEach(row => row.forEach(tile => {
-            tile.camels.forEach(camel => {
+        game.state.tiles.forEach(row => row.forEach(t => {
+            t.camels.forEach(camel => {
                 if (camel.colour === player.colour) {
                     count++;
                 }
@@ -122,6 +164,7 @@ export class ActionService {
             cost: tile.camels.length === 0 ? 1 : 2,
             executor: () => {
                 tile.camels.push({colour: player.colour, carrying: undefined, isResourceSafe: false});
+                return false;
             }
         };
     }
@@ -149,6 +192,10 @@ export class ActionService {
             return { message: `No camel belonging to ${player.id} carrying no resource at {x: ${data.to.x}, y: ${data.to.y}}` };
         }
 
+        if (!this.hasPath(game, data.from, data.to, player.colour)) {
+            return { message: `Cannot find a path of camels belonging to ${player.id} from {x: ${data.from.x}, y: ${data.from.y}} to {x: ${data.to.x}, y: ${data.to.y}}` };
+        }
+
         return {
             cost: 1,
             executor: () => {
@@ -156,15 +203,23 @@ export class ActionService {
                 fromCamel.isResourceSafe = false;
                 if (toTile.deliver === data.resource) {
                     game.state.deliveries.push(new Delivery(player.id, data.resource, 0));
+                    if (game.state.finalTurn) {
+                        return true;
+                    }
                 } else {
                     toCamel.carrying = data.resource;
                     toCamel.isResourceSafe = false;
                 }
+                return false;
             }
         }
     }
 
     performStealAction(game: Game, player: Player, data: StealData): ActionResult {
+        if (game.state.stealTokens[player.id] <= 0) {
+            return { message: `Player ${player.id} has no steal actions remaining` };
+        }
+
         const tile = this.findTile(game, data.tile);
 
         if (!tile) {
@@ -182,12 +237,21 @@ export class ActionService {
             return { message: `No camel belonging to ${player.id} carrying no resource at {x: ${data.tile.x}, y: ${data.tile.y}}` };
         }
 
+        const targetPlayer = game.players.find(p => p.colour === targetCamel.colour);
+
+        if (!targetPlayer) {
+            return { message: `Cannot find a player with colour matching the target camel` };
+        }
+
         return {
             cost: 1,
             executor: () => {
                 receivingCamel.carrying = targetCamel.carrying;
                 targetCamel.carrying = undefined;
                 receivingCamel.isResourceSafe = true;
+                game.state.stealTokens[player.id] = Math.max(0, game.state.stealTokens[player.id] - 1);
+                game.state.stealTokens[targetPlayer.id] += 1;
+                return false;
             }
         }
     }

@@ -1,4 +1,6 @@
-import store, { TemplateStore } from './store';
+import Store from './store';
+import redisStore from './redisStore';
+import TemplateStore from './templateStore';
 
-export default store;
-export { TemplateStore }
+export default Store;
+export { TemplateStore, redisStore }

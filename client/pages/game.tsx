@@ -1,46 +1,57 @@
 import * as React from 'react';
-import { GameTile } from '../../common/model/game/gameTile';
-import { Resource } from '../../common/model/game/resource';
 import "./game.less";
 import Board from '../components/game/board';
 import Actions from '../components/game/actions';
-import { Camel } from '../../common/model/game/camel';
+import { Page } from '../../common/model/client/page';
+import { GameQuery, GameQueryBuilder } from '../util/query';
+import SelectCamel from '../components/game/selectCamel';
+import Players from '../components/game/players';
+import GameControls from '../components/game/gameControls';
+import GameHeader from '../components/game/gameHeader';
+import { useHub } from '../repo/hubRepo';
+import { gameInStorage } from '../repo/gameRepo';
+import gameLoop from '../service/gameLoopService';
 
-function deliver(deliver: Resource) {
-    return new GameTile([ new Camel('yellow', 'blue', false) ], undefined, deliver, 0, 0);
+interface GameProps {
+    pageData: any;
+    setPage: (page: Page, pageData?: any) => void;
 }
 
-function money(c: number) {
-    return new GameTile([ new Camel('blue', 'pink', true) ], "pink", undefined, c, 1);
-}
+export default ({ setPage }: GameProps): JSX.Element => {
+    if (!gameInStorage()) {
+        setPage('home');
+    }
 
-function spawn(c: number) {
-    return new GameTile([ new Camel('black', 'brown', false) ], "grey", undefined, c, 0);
-}
-
-function tile() {
-    return new GameTile([ new Camel('green', 'purple', false) ], undefined, undefined, 0, 0);
-}
-
-
-
-export default (): JSX.Element => {
-    let c = 1;
-    const tiles = [
-        [money(c++),       tile(),     tile(),           deliver('grey'),  tile(),          tile(),     money(c++)],
-        [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
-        [tile(),           tile(),     tile(),           deliver('red'),   tile(),          tile(),     tile()],
-        [deliver('green'), tile(),     deliver('white'), tile(),           deliver('blue'), tile(),     deliver('purple')],
-        [tile(),           tile(),     tile(),           deliver('brown'), tile(),          tile(),     tile()],
-        [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
-        [money(c++),       tile(),     tile(),           deliver('pink'),  tile(),          tile(),     money(c++)],
-    ];
+    const hub = useHub();
+    const game = hub.game;
+    const tiles = game?.state?.tiles;
     const [selected, setSelected] = React.useState<{x: number, y: number}>();
+    const [query, setQuery] = React.useState<GameQuery<any>>();
+
+    const wrappedSetSelected = (pos: {x: number, y: number}) => {
+        if (query && query.name === 'select-tile') {
+            query.resolve(pos);
+        }
+        setSelected(pos);
+    };
+
+    const queryBuilder = new GameQueryBuilder(setQuery);
+
+    gameLoop.setHub(hub);
+    gameLoop.ensureRunning();
 
     return (
-        <div className="game"> 
-            <Board tiles={tiles} selected={selected} setSelected={setSelected}></Board>     
-            <Actions tile={selected && tiles[selected.y] && tiles[selected.y][selected.x]}></Actions>
+        <div className="game">
+            <div className="game-side">
+                <GameControls hub={hub}/>
+                <Players game={game}/>
+            </div>
+            <div className="game-main">
+                { query && query.name === 'select-camel' && <SelectCamel query={query}></SelectCamel> }
+                <GameHeader hub={hub} query={query}/>
+                <Board tiles={tiles} selected={selected} setSelected={wrappedSetSelected}></Board>
+                <Actions hub={hub} tile={selected && tiles[selected.y] && tiles[selected.y][selected.x]} pos={selected} queryBuilder={queryBuilder}></Actions>
+            </div>
         </div>
     )
 };

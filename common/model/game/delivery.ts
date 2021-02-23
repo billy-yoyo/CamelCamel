@@ -17,6 +17,14 @@ export class Delivery {
         this.resource = resource;
         this.money = money;
     }
+
+    countScore() {
+        if (this.resource === 'red' || this.resource === 'blue' || this.resource === 'white' || this.resource === 'brown') {
+            return 3 + this.money;
+        } else {
+            return 6 + this.money;
+        }
+    }
 }
 
 export const TDelivery = T.AutoClass(Delivery);

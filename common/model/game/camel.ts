@@ -7,7 +7,7 @@ export class Camel {
     @T.template(TPlayerColour)
     public colour: PlayerColour;
 
-    @T.template(TResource)
+    @T.template(T.Optional(TResource))
     public carrying: Resource;
 
     @T.template(T.Boolean)

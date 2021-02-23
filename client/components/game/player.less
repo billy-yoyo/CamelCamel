@@ -1,0 +1,40 @@
+@import '../../styles/_index.less';
+
+.player {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: black;
+    background-color: white;
+    width: 100%;
+
+    .colour {
+        width: 30px;
+        height: 30px;
+        border-width: 2px;
+        box-sizing: border-box;
+        border-style: solid;
+        border-color: white;
+    }
+
+    .name {
+        margin-left: 6px;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        border-radius: 5px;
+        font-size: 1.5rem;
+    }
+
+    &.turn .name {
+        background-color: @primary;
+        color: white;
+    }
+
+    .score {
+        margin-left: auto;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+}

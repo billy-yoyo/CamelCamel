@@ -1,0 +1,35 @@
+@import '../styles/_index.less';
+
+.colour-picker {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: @primary-text;
+    color: @primary;
+    border-width: 2px;
+    border-style: solid;
+    border-color: @primary;
+    margin-bottom: 40px;
+
+    .colour-choice {
+        min-width: 50px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: @primary;
+
+        transition: flex 1s;
+    }
+    
+    .colour-choice.selected {
+        flex: 1;
+    }
+
+    .colour-choice:hover {
+        border-width: 2px;
+        border-color: white;
+    }
+}

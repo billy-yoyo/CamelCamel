@@ -38,7 +38,7 @@ async function performRequest(opts: RequestOptions): Promise<any> {
         xhr.onload = () => {
             const data = attemptJSON(xhr.responseText);
 
-            if (data && this.status >= 200 && this.status < 300) {
+            if (data && xhr.status >= 200 && xhr.status < 300) {
                 resolve(data)
             } else {
                 reject({
@@ -87,20 +87,20 @@ export async function getGame(gameId: string): Promise<Response<Game>> {
     });
 }
 
-export async function createGame(): Promise<Response<Game>> {
+export async function createGame(gameId: string): Promise<Response<Game>> {
     return await performRequestWithModel({
         method: 'post',
-        path: '/game',
+        path: `/game/${gameId}`,
         template: TGame
     });
 }
 
-export async function joinGame(gameId: string, player: Player): Promise<Response<Success>> {
+export async function joinGame(gameId: string, player: Player): Promise<Response<Game>> {
     return await performRequestWithModel({
         method: 'post',
         path: `/game/${gameId}/join`,
         data: TPlayer.toTransit(player),
-        template: TSuccess
+        template: TGame
     });
 }
 
@@ -121,10 +121,18 @@ export async function performAction(gameId: string, playerId: string, action: Ac
     });
 }
 
-export async function shouldUpdate(gameId: string): Promise<Response<Update>> {
+export async function endTurn(gameId: string, playerId: string): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/end/${playerId}`,
+        template: TSuccess
+    });
+}
+
+export async function shouldUpdate(gameId: string, gameVersion: number): Promise<Response<Update>> {
     return await performRequestWithModel({
         method: 'get',
-        path: `/game/${gameId}/updated`,
+        path: `/game/${gameId}/updated?version=${gameVersion}`,
         template: TUpdate
     });
 }
