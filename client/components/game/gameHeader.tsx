@@ -33,9 +33,9 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
                 <div className="game-header-row">
                     Game finished!
                     {
-                        winners.length <= 0 
+                        winners.length <= 0
                             ? 'There were no winners!'
-                            : (winners.length == 1
+                            : (winners.length === 1
                                 ? `${winners[0].id} was the winner with a score of ${winnerScore}!`
                                 : `${winners.join(', ')} were all the winners, each with a score of ${winnerScore}!`
                             )
