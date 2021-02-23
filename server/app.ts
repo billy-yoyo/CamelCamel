@@ -5,12 +5,13 @@ import * as bodyParser from 'body-parser';
 
 const app = express();
 const port = process.env.PORT || 8181;
+const host = process.env.HOST || 'localhost';
 
 app.use(bodyParser.json());
 
 app.use('/', express.static(path.join(__dirname, '../static')))
 app.use('/game', gameAPI);
 
-app.listen( port, () => {
+app.listen(port, () => {
     console.log( `server started at http://localhost:${ port }` );
 });
