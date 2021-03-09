@@ -53,12 +53,12 @@ router.post('/:gameId/join', safeHandler(async (req, res) => {
         return errors.notFound(res, `No game with id ${req.params.gameId} found`);
     }
 
-    const joined = await gameService.joinGame(game, player);
+    const response = await gameService.joinGame(game, player);
 
-    if (joined) {
+    if (!response) {
         return res.json(TGame.toTransit(game));
     } else {
-        return errors.badRequest(res, `Player with that id or colour already exists, or too many players are already in the game`);
+        return errors.badRequest(res, response);
     }
 }));
 
@@ -78,17 +78,17 @@ router.post('/:gameId/start', safeHandler(async (req, res) => {
     }
 }));
 
-router.post('/:gameId/action/:playerId', safeHandler(async (req, res) => {
+router.post('/:gameId/action', safeHandler(async (req, res) => {
     const game = await gameService.getGame(req.params.gameId);
 
     if (!game) {
         return errors.notFound(res, `No game with id ${req.params.gameId} found`);
     }
 
-    const player = game.players.find(p => p.id === req.params.playerId);
+    const player = game.players.find(p => p.id === req.query.playerId);
 
     if (!player) {
-        return errors.notFound(res, `No player with id ${req.params.playerId} is in game ${req.params.gameId}`);
+        return errors.notFound(res, `No player with id ${req.query.playerId} is in game ${req.params.gameId}`);
     }
 
     if (!TAction.valid(req.body)) {
@@ -105,17 +105,39 @@ router.post('/:gameId/action/:playerId', safeHandler(async (req, res) => {
     return res.json({ remainingActions: result });
 }));
 
-router.post('/:gameId/end/:playerId', safeHandler(async (req, res) => {
+router.post('/:gameId/undo', safeHandler(async (req, res) => {
     const game = await gameService.getGame(req.params.gameId);
 
     if (!game) {
         return errors.notFound(res, `No game with id ${req.params.gameId} found`);
     }
 
-    const player = game.players.find(p => p.id === req.params.playerId);
+    const player = game.players.find(p => p.id === req.query.playerId);
 
     if (!player) {
-        return errors.notFound(res, `No player with id ${req.params.playerId} is in game ${req.params.gameId}`);
+        return errors.notFound(res, `No player with id ${req.query.playerId} is in game ${req.params.gameId}`);
+    }
+
+    if (game.state.turn.playerId !== player.id) {
+        return errors.badRequest(res, `It's not ${player.id}'s turn`);
+    }
+
+    const reverted = await gameService.revertGameState(game);
+
+    return res.json({ success: reverted });
+}));
+
+router.post('/:gameId/end', safeHandler(async (req, res) => {
+    const game = await gameService.getGame(req.params.gameId);
+
+    if (!game) {
+        return errors.notFound(res, `No game with id ${req.params.gameId} found`);
+    }
+
+    const player = game.players.find(p => p.id === req.query.playerId);
+
+    if (!player) {
+        return errors.notFound(res, `No player with id ${req.query.playerId} is in game ${req.params.gameId}`);
     }
 
     const result = await gameService.endTurn(game, player);

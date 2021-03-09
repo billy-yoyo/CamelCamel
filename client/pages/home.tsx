@@ -10,7 +10,6 @@ import T from 'tsplate';
 import * as networkService from '../service/networkService';
 import { Player } from '../../common/model/game/player';
 import { PlayerColour } from '../../common/model/game/playerColour';
-import { haltingSequence } from '../util/asyncHelper';
 import { storeGame } from '../repo/gameRepo';
 import { storePlayer } from '../repo/playerRepo';
 
@@ -52,28 +51,61 @@ const attemptJoinGame = async ({ setPage, gameName, player }: JourneyProps, afte
     setPage('game');
 };
 
+const GameNamePattern = /^[A-Z0-9_-]*$/g;
+const validateGameName = (gameName: string): string => {
+    if (gameName.length < 4) {
+        return 'Game name must be at least 4 characters';
+    } else if (!gameName.match(GameNamePattern)) {
+        return 'Game name can only contain letters, numbers, _ and -'
+    }
+
+    return undefined;
+};
+
+const validatePlayerName = (playerName: string): string => {
+    if (playerName.length < 1) {
+        return 'Player name must be at least one character long';
+    } else if (playerName.length > 12) {
+        return 'Player name cannot be longer than 12 characters';
+    }
+
+    return undefined;
+};
+
+const gameAndPlayerNamesAreValid = (gameName: string, playerName: string): boolean => {
+    return !validatePlayerName(gameName) && !validatePlayerName(playerName);
+}
+
 export default ({ setPage, pageData }: HomeProps): JSX.Element => {
     const [gameName, setGameName] = useLocalStorage('gameName', T.String);
     const [playerName, setPlayerName] = useLocalStorage('playerName', T.String);
     const [playerColour, setPlayerColour] = useLocalStorage('playerColour', T.String, 'black');
     const errorMessage = pageData && pageData.error;
+    const namesValid = gameAndPlayerNamesAreValid(gameName, playerName);
 
     const colours: PlayerColour[] = ['black', 'blue', 'green', 'yellow'];
 
     const createJourneyProps = (): JourneyProps => ({ setPage, gameName, player: new Player(playerName, playerColour as PlayerColour) });
     const withJourneyProps = (func: (props: JourneyProps) => any) => (() => func(createJourneyProps()))
+    const validatedWithJourneyProps = (func: (props: JourneyProps) => any) => {
+        if (gameAndPlayerNamesAreValid(gameName, playerName)) {
+            return withJourneyProps(func);
+        }
+    };
 
-    const onCreateGame = withJourneyProps(attemptCreateGame);
-    const onJoinGame = withJourneyProps(attemptJoinGame);
+    const onCreateGame = validatedWithJourneyProps(attemptCreateGame);
+    const onJoinGame = validatedWithJourneyProps(attemptJoinGame);
 
     return (
         <div className="home">
-            <Camel colour='#44b' width="300px"></Camel>
+            <div className="home-logo">
+                <Camel colour='#44b' width="300px"></Camel>
+            </div>
             <div className="game-name">
-                <Textbox title="Game" value={gameName} setValue={setGameName}></Textbox>
+                <Textbox title="Game" value={gameName} setValue={setGameName} validator={validateGameName} uppercase={true}></Textbox>
             </div>
             <div className="player-name">
-                <Textbox title="Player" value={playerName} setValue={setPlayerName}></Textbox>
+                <Textbox title="Player" value={playerName} setValue={setPlayerName} validator={validatePlayerName}></Textbox>
             </div>
             <div className="player-colour">
                 <ColourPicker colours={colours} colour={playerColour} setColour={setPlayerColour}></ColourPicker>
@@ -82,10 +114,10 @@ export default ({ setPage, pageData }: HomeProps): JSX.Element => {
                 errorMessage && ( <div className="error-message">{errorMessage}</div> )
             }
             <div className="create-game">
-                <Button title="Create Game" onclick={onCreateGame}></Button>
+                <Button title="Create Game" onclick={onCreateGame} disabled={!namesValid}></Button>
             </div>
             <div className="join-game">
-                <Button title="Join Game" onclick={onJoinGame}></Button>
+                <Button title="Join Game" onclick={onJoinGame} disabled={!namesValid}></Button>
             </div>
 
         </div>

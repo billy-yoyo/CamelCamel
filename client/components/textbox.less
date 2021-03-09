@@ -3,13 +3,17 @@
 .textbox-container {
     display: flex;
     flex-direction: column;
+
+    &.error .textbox {
+        border-color: @error;
+    }
 }
 
 .textbox-title {
     font-size: 1rem;
     font-weight: bold;
-    margin-bottom: 3px;
     color: @primary;
+    margin-bottom: 3px;
 }
 
 .textbox {
@@ -31,4 +35,14 @@
     padding-bottom: 7px;
     color: @primary;
     text-align: center;
+}
+
+.textbox-error {
+    font-size: 1rem;
+    color: @error;
+    margin-top: 3px;
+}
+
+.textbox.uppercase {
+    text-transform: uppercase;
 }

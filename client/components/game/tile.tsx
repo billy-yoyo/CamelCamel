@@ -3,6 +3,7 @@ import { GameTile } from '../../../common/model/game/gameTile';
 import Octagon from '../../images/octagon';
 import './tile.less';
 import Camel from './camel';
+import { resourceColour, resourceLetters, resourceLettersColour } from '../../styles/resourceStyling';
 
 interface TileProps {
     tile: GameTile;
@@ -27,7 +28,10 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
             {
                 tile.deliver ? (
                     <div className="octagon">
-                        <Octagon width="90px" height="90px" fill={tile.deliver} stroke={tile.deliver}></Octagon>
+                        <Octagon width="90px" height="90px" fill={ resourceColour(tile.deliver) } stroke={ resourceColour(tile.deliver) }></Octagon>
+                        <div className="octagon-letters" style={{color: resourceColour(tile.deliver)}}>
+                            { resourceLetters(tile.deliver) }
+                        </div>
                     </div>
                  ) : null
             }
@@ -51,7 +55,9 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
 
                 {
                     tile.resource ? (
-                        <div className="resource" style={{backgroundColor: tile.resource}}></div>
+                        <div className="resource" style={{backgroundColor: resourceColour(tile.resource), color: resourceLettersColour(tile.resource)}}>
+                            { resourceLetters(tile.resource) }
+                        </div>
                     ) : null
                 }
 

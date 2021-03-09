@@ -7,13 +7,23 @@ interface ButtonProps {
     style?: Styles;
     title: string;
     onclick?: () => void;
+    disabled?: boolean;
 }
 
-export default ({ style, title, onclick }: ButtonProps): JSX.Element => {
-    const classes = ['button', style || 'primary']
+export default ({ style, title, onclick, disabled }: ButtonProps): JSX.Element => {
+    const classes = ['button', style || 'primary'];
+    if (disabled) {
+        classes.push('disabled');
+    }
+
+    const guardedOnClick = () => {
+        if (!disabled) {
+            onclick();
+        }
+    };
 
     return (
-        <div className={classes.join(' ')} onClick={onclick}>
+        <div className={classes.join(' ')} onClick={guardedOnClick}>
             {title}
         </div>
     )

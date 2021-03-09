@@ -4,6 +4,7 @@ import { GameTile } from '../../../common/model/game/gameTile';
 import { Hub } from '../../util/hub';
 import { GameQuery, GameQueryBuilder } from '../../util/query';
 import ActionButton from './actionButton';
+import UndoButton from './undoButton';
 import './actions.less';
 
 interface ActionsProps {
@@ -15,7 +16,7 @@ interface ActionsProps {
 
 export default ({ hub, tile, pos, queryBuilder }: ActionsProps): JSX.Element => {
     const [processing, setProcessing] = React.useState<ActionType>();
-    const actions: ActionType[] = ['place', 'move', 'pickup', 'steal', 'transport'];
+    const actions: ActionType[] = ['place', 'pickup', 'move', 'steal', 'transport'];
 
     return (
         <div className="actions">
@@ -32,6 +33,7 @@ export default ({ hub, tile, pos, queryBuilder }: ActionsProps): JSX.Element => 
                       key={i} />
                 ))
             }
+            <UndoButton hub={hub} setProcessing={setProcessing}/>
         </div>
     )
 };

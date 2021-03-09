@@ -115,16 +115,24 @@ export async function startGame(gameId: string): Promise<Response<Success>> {
 export async function performAction(gameId: string, playerId: string, action: Action): Promise<Response<RemainingActions>> {
     return await performRequestWithModel({
         method: 'post',
-        path: `/game/${gameId}/action/${playerId}`,
+        path: `/game/${gameId}/action?playerId=${encodeURIComponent(playerId)}`,
         data: TAction.toTransit(action),
         template: TRemainingActions
+    });
+}
+
+export async function undoAction(gameId: string, playerId: string): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/undo?playerId=${encodeURIComponent(playerId)}`,
+        template: TSuccess
     });
 }
 
 export async function endTurn(gameId: string, playerId: string): Promise<Response<Success>> {
     return await performRequestWithModel({
         method: 'post',
-        path: `/game/${gameId}/end/${playerId}`,
+        path: `/game/${gameId}/end?playerId=${encodeURIComponent(playerId)}`,
         template: TSuccess
     });
 }

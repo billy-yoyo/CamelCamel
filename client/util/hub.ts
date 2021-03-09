@@ -1,6 +1,6 @@
 import { Game } from "../../common/model/game/game";
 import { Player } from "../../common/model/game/player";
-import { shouldUpdate, getGame } from '../service/networkService';
+import { getGame } from '../service/networkService';
 
 interface HubProps {
     game: Game;

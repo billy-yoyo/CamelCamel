@@ -1,5 +1,6 @@
 import { Game } from "../../common/model/game/game";
 import gameRepo from '../repo/gameRepo';
+import gameStateHistoryRepo from '../repo/gameStateHistoryRepo';
 import { GameState } from "../../common/model/game/gameState";
 import { Resource } from "../../common/model/game/resource";
 import { GameTile } from "../../common/model/game/gameTile";
@@ -28,14 +29,18 @@ function tile() {
     return new GameTile([], undefined, undefined, 0, 0);
 }
 
-
 export class GameService {
+    async deleteGame(id: string): Promise<void> {
+        await gameRepo.set(id, undefined);
+        await gameStateHistoryRepo.set(id, undefined);
+    }
+
     async getGame(id: string): Promise<Game> {
         const game = await gameRepo.get(id);
 
         if (game && new Date().getTime() > game.lifetime) {
-            console.warn(`game is too old, considering as dead.`)
-            await gameRepo.set(id, undefined);
+            console.warn(`game is too old, considering as dead.`);
+            await this.deleteGame(game.id);
             return undefined;
         }
 
@@ -81,32 +86,39 @@ export class GameService {
         return game;
     }
 
-    async joinGame(game: Game, player: Player): Promise<boolean> {
-        if (game.state.mode !== 'creating') {
-            return false;
-        }
-
-        // player has already joined game, so we can return true
+    async joinGame(game: Game, player: Player): Promise<string> {
+        // player has already joined game, so we can return true even if the game has already started
         if (game.players.some(
             otherPlayer => otherPlayer.id === player.id && otherPlayer.colour === player.colour
         )) {
-            return true;
+            return undefined;
+        }
+
+        // if the player isn't already in the game when it starts, then they can't join late
+        if (game.state.mode !== 'creating') {
+            return `Game ${game} is already in progress`;
         }
 
         if (game.players.some(
-            otherPlayer => otherPlayer.id === player.id || otherPlayer.colour === player.colour
+            otherPlayer => otherPlayer.id === player.id
         )) {
-            return false;
+            return `A player with the same name is already in the game`;
+        }
+
+        if (game.players.some(
+            otherPlayer => otherPlayer.colour === player.colour
+        )) {
+            return `A player with the same colour is already in the game`;
         }
 
         if (game.players.length >= 4) {
-            return false;
+            return `The game is already full`;
         }
 
         game.players.push(player);
         game.version++;
         await gameRepo.set(game.id, game);
-        return true;
+        return undefined;
     }
 
     async startGame(game: Game): Promise<boolean> {
@@ -174,6 +186,9 @@ export class GameService {
             return 'You don\'t have enough actions left to perform that action';
         }
 
+        // save the game state just before we perform the action, so we can easily revert it
+        await this.saveGameState(game);
+
         game.state.turn.remainingActions -= result.cost;
         game.state.turn.actions.push(action);
         if (result.executor()) {
@@ -208,6 +223,7 @@ export class GameService {
 
         game.version++;
         await gameRepo.set(game.id, game);
+        await this.clearGameStateHistory(game);
         return undefined;
     }
 
@@ -271,6 +287,38 @@ export class GameService {
 
     async endGame(game: Game): Promise<void> {
         game.state.mode = 'finished';
+        await this.clearGameStateHistory(game);
+    }
+
+    async revertGameState(game: Game): Promise<boolean> {
+        const history = await gameStateHistoryRepo.get(game.id);
+
+        if (!history || history.length === 0) {
+            return false;
+        } else {
+            const oldState = history.pop();
+
+            await gameStateHistoryRepo.set(game.id, history);
+
+            game.state = oldState;
+            game.version++;
+
+            await gameRepo.set(game.id, game);
+        }
+    }
+
+    async saveGameState(game: Game): Promise<void> {
+        let history = await gameStateHistoryRepo.get(game.id);
+        if (history) {
+            history.push(game.state);
+        } else {
+            history = [game.state];
+        }
+        await gameStateHistoryRepo.set(game.id, history);
+    }
+
+    async clearGameStateHistory(game: Game): Promise<void> {
+        await gameStateHistoryRepo.set(game.id, []);
     }
 }
 

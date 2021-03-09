@@ -83,6 +83,10 @@ export class ActionService {
             return { message: `Invalid to tile {x: ${data.to.x}, y: ${data.to.y}}` };
         }
 
+        if (data.from.x === data.to.x && data.from.y === data.to.y) {
+            return { message: `Cannot move to the tile the camel is already on` };
+        }
+
         const camels = this.findCamels(fromTile, player.colour);
         if (camels.length === 0) {
             return { message: `No camel belonging to player ${player.id} at tile {x: ${data.from.x}, y: ${data.from.y}}` };
@@ -179,6 +183,10 @@ export class ActionService {
 
         if (!toTile) {
             return { message: `Invalid to tile {x: ${data.to.x}, y: ${data.to.y}}` };
+        }
+
+        if (data.from.x === data.to.x && data.from.y === data.to.y) {
+            return { message: `Cannot transport to the tile the camel is already on` };
         }
 
         const fromCamel = fromTile.camels.find(camel => camel.colour === player.colour && camel.carrying === data.resource);
