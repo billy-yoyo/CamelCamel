@@ -16,7 +16,7 @@ export default ({ title, value, uppercase, setValue, validator }: TextboxProps):
         if (uppercase) {
             return v ? v.toUpperCase() : '';
         } else {
-            return '';
+            return v;
         }
     };
 
