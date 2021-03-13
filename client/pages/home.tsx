@@ -53,7 +53,9 @@ const attemptJoinGame = async ({ setPage, gameName, player }: JourneyProps, afte
 
 const GameNamePattern = /^[A-Z0-9_-]*$/g;
 const validateGameName = (gameName: string): string => {
-    if (gameName.length < 4) {
+    if (!gameName) {
+        return undefined;
+    } if (gameName.length < 4) {
         return 'Game name must be at least 4 characters';
     } else if (!gameName.match(GameNamePattern)) {
         return 'Game name can only contain letters, numbers, _ and -'
@@ -63,7 +65,9 @@ const validateGameName = (gameName: string): string => {
 };
 
 const validatePlayerName = (playerName: string): string => {
-    if (playerName.length < 1) {
+    if (!playerName) {
+        return undefined;
+    } else if (playerName.length < 1) {
         return 'Player name must be at least one character long';
     } else if (playerName.length > 12) {
         return 'Player name cannot be longer than 12 characters';

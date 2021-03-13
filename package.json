@@ -13,7 +13,8 @@
     "watchClient": "webpack -c client/webpack.config.js --watch",
     "start": "npm run buildClient && npm run startServer",
     "quickStart": "tsc --project server/tsconfig.json && node .",
-    "test": "npx jest"
+    "test": "npx jest",
+    "build": "npm run buildClient && npm run buildServer"
   },
   "author": "",
   "license": "ISC",
