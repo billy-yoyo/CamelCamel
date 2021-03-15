@@ -4,6 +4,7 @@
 
 * Tom can't do anything (possibly to do with failing to join game? possible space in name? could end turn, couldn't use any actions.)
 * add tutorial / help instructions.
+* cube colours wrong when carried
 
 # Resolved
 

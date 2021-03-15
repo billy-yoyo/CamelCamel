@@ -28,12 +28,12 @@ export class ActionService {
     }
 
     private findCamels(tile: GameTile, colour: PlayerColour) {
-        return tile.camels.filter(camel => camel.colour === colour);
+        return tile ? tile.camels.filter(camel => camel.colour === colour) : [];
     }
 
     private hasPath(game: Game, from: {x: number, y: number}, to: {x: number, y: number}, colour: PlayerColour): boolean {
         const tiles = game.state.tiles;
-        const hasCamel = ({ x, y }: {x: number, y: number}) => this.findCamels(tiles[y][x], colour).length > 0
+        const hasCamel = ({ x, y }: {x: number, y: number}) => this.findCamels(tiles[y] && tiles[y][x], colour).length > 0
 
         if (!hasCamel(from)) {
             return false;

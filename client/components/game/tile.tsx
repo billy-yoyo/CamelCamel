@@ -28,7 +28,7 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
             {
                 tile.deliver ? (
                     <div className="octagon">
-                        <Octagon width="90px" height="90px" fill={ resourceColour(tile.deliver) } stroke={ resourceColour(tile.deliver) }></Octagon>
+                        <Octagon width="min(11vw, 90px)" height="min(11vw, 90px)" fill={ resourceColour(tile.deliver) } stroke={ resourceColour(tile.deliver) }></Octagon>
                         <div className="octagon-letters" style={{color: resourceColour(tile.deliver)}}>
                             { resourceLetters(tile.deliver) }
                         </div>
