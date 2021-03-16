@@ -12,3 +12,41 @@
     min-width: 300px;
     margin-right: 10px;
 }
+
+.game-side-panel {
+    display: flex;
+    position: fixed;
+    flex-direction: column;
+    width: calc(100vw - 5px);
+    left: calc(-100vw - 20px);
+    right: 0;
+    bottom: 0;
+    top: 0;
+    padding-top: 70px;
+    background-color: white;
+    padding-left: 2px;
+    z-index: 10;
+    transition: left 0.5s;
+}
+
+.game-side-panel.open {
+    left: 0px;
+    right: 100vw;
+}
+
+.game-side-panel-toggle {
+    position: fixed;
+    font-size: 2rem;
+    font-weight: bold;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    left: 20px;
+    top: 20px;
+    padding: 5px;
+    z-index: 20;
+}

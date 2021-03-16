@@ -9,14 +9,29 @@ interface GameControlsProps {
     hub: Hub;
 }
 
+const GameInfo = ({ hub }: GameControlsProps): JSX.Element => {
+    return <div className="game-info">
+        <div className="game-info-row">
+            <div className="game-info-name">
+                Remaining Cubes
+            </div>
+            <div className="game-info-value">
+                { Object.values(hub.game.state.bag).reduce((total, x) => total + x, 0) }
+            </div>
+        </div>
+    </div>
+};
+
 export default ({ hub }: GameControlsProps): JSX.Element => {
 
     const startGame = async () => {
         await networkService.startGame(hub.game.id);
         await hub.refreshGame();
     };
-    const endGame = () => {
-        alert('ending game not supported yet');
+
+    const restartGame = async () => {
+        await networkService.restartGame(hub.game.id);
+        await hub.refreshGame();
     };
 
     return (
@@ -24,8 +39,11 @@ export default ({ hub }: GameControlsProps): JSX.Element => {
             <div className="buttons">
                 {
                     hub.game.state.mode === 'creating'
-                        ? <Button title="Start Game" onclick={startGame}/>
-                        : <Button title="End Game" onclick={endGame}/>
+                        ? <Button title="Start Game" onclick={startGame} />
+                        : ( hub.game.state.mode === 'playing'
+                            ? <GameInfo hub={hub}/>
+                            : <Button title="Restart Game" onclick={restartGame} />
+                        ) 
                 }
             </div>
         </Panel>

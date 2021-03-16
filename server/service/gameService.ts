@@ -56,27 +56,32 @@ export class GameService {
         return !!game;
     }
 
+    createNewGameState(): GameState {
+        let c = 1;
+
+        return new GameState('creating', undefined, [
+            [money(c++),       tile(),     tile(),           deliver('grey'),  tile(),          tile(),     money(c++)],
+            [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
+            [tile(),           tile(),     tile(),           deliver('red'),   tile(),          tile(),     tile()],
+            [deliver('green'), tile(),     deliver('white'), tile(),           deliver('blue'), tile(),     deliver('purple')],
+            [tile(),           tile(),     tile(),           deliver('brown'), tile(),          tile(),     tile()],
+            [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
+            [money(c++),       tile(),     tile(),           deliver('pink'),  tile(),          tile(),     money(c++)],
+        ], [], {
+            'green': 0, 'red': 0, 'blue': 0, 'brown': 0,
+            'grey': 0, 'pink': 0, 'purple': 0, 'white': 0
+        }, false, {})
+    }
+
     async createGame(gameId: string): Promise<Game> {
         if (await this.gameExists(gameId)) {
             return null;
         }
 
-        let c = 1;
         const game = new Game(
             gameId,
             GAME_CAMEL_LIMIT,
-            new GameState('creating', undefined, [
-                [money(c++),       tile(),     tile(),           deliver('grey'),  tile(),          tile(),     money(c++)],
-                [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
-                [tile(),           tile(),     tile(),           deliver('red'),   tile(),          tile(),     tile()],
-                [deliver('green'), tile(),     deliver('white'), tile(),           deliver('blue'), tile(),     deliver('purple')],
-                [tile(),           tile(),     tile(),           deliver('brown'), tile(),          tile(),     tile()],
-                [tile(),           spawn(c++), tile(),           tile(),           tile(),          spawn(c++), tile()],
-                [money(c++),       tile(),     tile(),           deliver('pink'),  tile(),          tile(),     money(c++)],
-            ], [], {
-                'green': 0, 'red': 0, 'blue': 0, 'brown': 0,
-                'grey': 0, 'pink': 0, 'purple': 0, 'white': 0
-            }, false, {}),
+            this.createNewGameState(),
             new Date().getTime() + GAME_LIFETIME,
             [],
             0
@@ -119,6 +124,23 @@ export class GameService {
         game.version++;
         await gameRepo.set(game.id, game);
         return undefined;
+    }
+
+    async restartGame(gameId: string): Promise<boolean> {
+        let game = await this.getGame(gameId);
+
+        if (game && game.state && game.state.mode !== 'finished') {
+            return false;
+        }
+    
+        if (!game) {
+            game = await this.createGame(gameId);
+        } else {
+            game.state = this.createNewGameState();
+        }
+        
+        await this.clearGameStateHistory(game);
+        await this.startGame(game);
     }
 
     async startGame(game: Game): Promise<boolean> {

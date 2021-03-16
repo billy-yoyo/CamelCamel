@@ -112,6 +112,14 @@ export async function startGame(gameId: string): Promise<Response<Success>> {
     });
 }
 
+export async function restartGame(gameId: string): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/restart`,
+        template: TSuccess
+    });
+}
+
 export async function performAction(gameId: string, playerId: string, action: Action): Promise<Response<RemainingActions>> {
     return await performRequestWithModel({
         method: 'post',

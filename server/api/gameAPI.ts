@@ -78,6 +78,16 @@ router.post('/:gameId/start', safeHandler(async (req, res) => {
     }
 }));
 
+router.post('/:gameId/restart', safeHandler(async (req, res) => {
+    const result = await gameService.restartGame(req.params.gameId);
+
+    if (!result) {
+        return errors.notFound(res, `Game with id ${req.params.gameId} cannot be restarted since it hasn't finished`);
+    }
+
+    return res.json({ success: true });
+}));
+
 router.post('/:gameId/action', safeHandler(async (req, res) => {
     const game = await gameService.getGame(req.params.gameId);
 

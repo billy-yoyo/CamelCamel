@@ -2,6 +2,11 @@ import { Game } from "../../common/model/game/game";
 import { Player } from "../../common/model/game/player";
 import { getGame } from '../service/networkService';
 
+export interface Animation {
+    render: () => JSX.Element;
+    duration: number;
+}
+
 interface HubProps {
     game: Game;
     player: Player;

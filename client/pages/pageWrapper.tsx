@@ -39,6 +39,7 @@ export default (): JSX.Element => {
         <div className="app">
             <div className="home-button button secondary" onClick={gotoHomePage}>X</div>
             <PageElement page={page} pageData={pageData} setPage={wrappedSetPage}></PageElement>
+            <div id="animation-container"></div>
         </div>
     )
 };

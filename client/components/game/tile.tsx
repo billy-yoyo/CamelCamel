@@ -24,7 +24,7 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
     const tileClass = classes.join(' ');
 
     return (
-        <div className={tileClass} onClick={onClick}>
+        <div className={tileClass} onClick={onClick} id={`tile-${x}-${y}`}>
             {
                 tile.deliver ? (
                     <div className="octagon">
@@ -55,15 +55,19 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
 
                 {
                     tile.resource ? (
-                        <div className="resource" style={{backgroundColor: resourceColour(tile.resource), color: resourceLettersColour(tile.resource)}}>
+                        <div className="resource" style={{
+                                backgroundColor: resourceColour(tile.resource), 
+                                color: resourceLettersColour(tile.resource),
+                                borderColor: resourceLettersColour(tile.resource)
+                            }}>
                             { resourceLetters(tile.resource) }
                         </div>
                     ) : null
                 }
 
                 {
-                    tile.camels.map(camel => (
-                        <Camel camel={camel} key={`${camel.colour}:${camel.carrying}:${camel.isResourceSafe}`}></Camel>
+                    tile.camels.map((camel, index) => (
+                        <Camel camel={camel} key={`${camel.colour}:${camel.carrying}:${camel.isResourceSafe}:${index}`}></Camel>
                     ))
                 }
             </div>

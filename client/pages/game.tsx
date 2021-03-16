@@ -11,11 +11,24 @@ import GameHeader from '../components/game/gameHeader';
 import { useHub } from '../repo/hubRepo';
 import { gameInStorage } from '../repo/gameRepo';
 import gameLoop from '../service/gameLoopService';
+import { isPortrait } from '../util/mediaQuery';
+import Burger from '../images/burger';
+import { Animation } from '../util/hub';
 
 interface GameProps {
     pageData: any;
     setPage: (page: Page, pageData?: any) => void;
 }
+
+interface AnimationState {
+    animations: {[id: string]: Animation};
+    setAnimations: (animations: {[id: string]: Animation}) => void;
+}
+
+const AnimationState: AnimationState = {
+    animations: {},
+    setAnimations: undefined
+};
 
 export default ({ setPage }: GameProps): JSX.Element => {
     if (!gameInStorage()) {
@@ -27,6 +40,7 @@ export default ({ setPage }: GameProps): JSX.Element => {
     const tiles = game?.state?.tiles;
     const [selected, setSelected] = React.useState<{x: number, y: number}>();
     const [query, setQuery] = React.useState<GameQuery<any>>();
+    const [panelToggle, setPanelToggle] = React.useState<boolean>(false);
 
     const wrappedSetSelected = (pos: {x: number, y: number}) => {
         if (query && query.name === 'select-tile') {
@@ -40,9 +54,18 @@ export default ({ setPage }: GameProps): JSX.Element => {
     gameLoop.setHub(hub);
     gameLoop.ensureRunning();
 
+    const togglePanel = () => {
+        setPanelToggle(!panelToggle);
+    };  
+
     return (
         <div className="game">
-            <div className="game-side">
+            { isPortrait() &&
+                <div className="game-side-panel-toggle button secondary" onClick={togglePanel}>
+                    <Burger size="40px" colour="#339"/>
+                </div>
+            }
+            <div className={isPortrait() ? 'game-side-panel ' + (panelToggle ? 'open' : '') : "game-side"}>
                 <GameControls hub={hub}/>
                 <Players game={game}/>
             </div>

@@ -37,7 +37,7 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
                             ? 'There were no winners!'
                             : (winners.length === 1
                                 ? `${winners[0].id} was the winner with a score of ${winnerScore}!`
-                                : `${winners.join(', ')} were all the winners, each with a score of ${winnerScore}!`
+                                : `${winners.map(p => p.id).join(', ')} were all the winners, each with a score of ${winnerScore}!`
                             )
                     }
                 </div>
@@ -74,6 +74,9 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
         <div className="game-header">
             <div className="game-header-row">
                 <div className="tab turn-name">
+                    {
+                        hub.game.state.finalTurn && 'The game will end with the next delivery!'
+                    }
                     {
                         query ? query.name : ( isMyTurn ? `It's your turn!` : `It's ${turn}'s turn` )
                     }

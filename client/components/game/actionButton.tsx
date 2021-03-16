@@ -8,8 +8,10 @@ import * as networkService from '../../service/networkService';
 import { Hub } from '../../util/hub';
 import { GameQueryBuilder } from '../../util/query';
 import './actionButton.less';
+import DeliveryAnimation from '../animation/delivery';
 
 interface ActionStateProps {
+    hub: Hub;
     player: Player;
     game: Game;
     tile: GameTile;
@@ -43,11 +45,11 @@ const hasCarryingCamel = ({ player, tile }: ActionStateProps) => (
 
 const hasStealableCamel = ({ player, tile }: ActionStateProps) => (
     tile.camels.some(camel => camel.colour !== player.colour && camel.carrying !== undefined && !camel.isResourceSafe)
-)
+);
 
 const hasStealToken = ({ player, game }: ActionStateProps) => (
     game.state.stealTokens[player.id] > 0
-)
+);
 
 const ACTION_VALIDATORS: {[k in ActionType]: ({ player, game, tile }: ActionStateProps) => boolean} = {
     place: (state) => hasRemainingCamel(state),
@@ -100,12 +102,23 @@ const handleAction = async (state: ActionStateProps, actionType: ActionType, set
     const response = await networkService.performAction(state.game.id, state.player.id, action);
     if (response.error) {
         // todo: somehow handle error?
+        return;
+    } else if (actionType === 'transport') {
+        const data = action.data as TransportData;
+        const tile = state.game.state.tiles[data.to.y][data.to.x];
+        if (tile.deliver === data.resource) {
+            const tileEl = document.getElementById(`tile-${data.to.x}-${data.to.y}`);
+            if (tileEl) {
+                DeliveryAnimation(tileEl);
+            }
+        }
     }
     // todo: keep track of remaining actions
 
     const game = await networkService.getGame(state.game.id);
     if (game.error) {
         // todo: somehow handle error?
+        return;
     }
 
     setGame(game.data);
@@ -124,7 +137,7 @@ export default ({ hub, pos, tile, action, processing, setProcessing, queryBuilde
     const game = hub.game;
     const player = hub.player;
 
-    const state: ActionStateProps = { player, game, tile, pos, queryBuilder };
+    const state: ActionStateProps = { hub, player, game, tile, pos, queryBuilder };
 
     const classes = ['action-button', 'button', 'primary'];
     if (!actionValid(state, action)) {
