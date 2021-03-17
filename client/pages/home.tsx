@@ -118,10 +118,10 @@ export default ({ setPage, pageData }: HomeProps): JSX.Element => {
                 errorMessage && ( <div className="error-message">{errorMessage}</div> )
             }
             <div className="create-game">
-                <Button title="Create Game" onclick={onCreateGame} disabled={!namesValid}></Button>
+                <Button title="Create Game" onclick={onCreateGame} disabled={!namesValid} alwaysBig={true}></Button>
             </div>
             <div className="join-game">
-                <Button title="Join Game" onclick={onJoinGame} disabled={!namesValid}></Button>
+                <Button title="Join Game" onclick={onJoinGame} disabled={!namesValid} alwaysBig={true}></Button>
             </div>
 
         </div>

@@ -43,7 +43,7 @@ export default ({ hub }: GameControlsProps): JSX.Element => {
                         : ( hub.game.state.mode === 'playing'
                             ? <GameInfo hub={hub}/>
                             : <Button title="Restart Game" onclick={restartGame} />
-                        ) 
+                        )
                 }
             </div>
         </Panel>

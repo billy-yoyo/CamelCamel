@@ -13,7 +13,9 @@ import { gameInStorage } from '../repo/gameRepo';
 import gameLoop from '../service/gameLoopService';
 import { isPortrait } from '../util/mediaQuery';
 import Burger from '../images/burger';
-import { Animation } from '../util/hub';
+import { Animation, Hub } from '../util/hub';
+import GameFooter from '../components/game/gameFooter';
+import { Player } from '../../common/model/game/player';
 
 interface GameProps {
     pageData: any;
@@ -28,6 +30,12 @@ interface AnimationState {
 const AnimationState: AnimationState = {
     animations: {},
     setAnimations: undefined
+};
+
+const PlayerScoreCounter = ({ player, hub }: { hub: Hub, player: Player }): JSX.Element => {
+    return <div className="game-stats-player-score" style={{ backgroundColor: player.colour, color: player.colour === 'yellow' ? 'black' : 'white' }}>
+        { player.calculateScore(hub.game.state) }
+    </div>
 };
 
 export default ({ setPage }: GameProps): JSX.Element => {
@@ -56,13 +64,28 @@ export default ({ setPage }: GameProps): JSX.Element => {
 
     const togglePanel = () => {
         setPanelToggle(!panelToggle);
-    };  
+    };
 
     return (
         <div className="game">
             { isPortrait() &&
                 <div className="game-side-panel-toggle button secondary" onClick={togglePanel}>
                     <Burger size="40px" colour="#339"/>
+                </div>
+            }
+            { isPortrait() &&
+                <div className="game-stats-banner">
+                    <div className="game-stats-remaining-cubes">
+                        <div className="game-stats-remaining-cube"></div>
+                        <div className="game-stats-remaining-cube-count">
+                            x{Object.values(hub.game.state.bag).reduce((total, x) => total + x, 0)}
+                        </div>
+                    </div>
+                    <div className="game-stats-player-scores">
+                        {
+                            hub.game.players.map(player => <PlayerScoreCounter hub={hub} player={player} key={`player-stats-${player.id}`}/>)
+                        }
+                    </div>
                 </div>
             }
             <div className={isPortrait() ? 'game-side-panel ' + (panelToggle ? 'open' : '') : "game-side"}>
@@ -73,7 +96,7 @@ export default ({ setPage }: GameProps): JSX.Element => {
                 { query && query.name === 'select-camel' && <SelectCamel query={query}></SelectCamel> }
                 <GameHeader hub={hub} query={query}/>
                 <Board tiles={tiles} selected={selected} setSelected={wrappedSetSelected}></Board>
-                <Actions hub={hub} tile={selected && tiles[selected.y] && tiles[selected.y][selected.x]} pos={selected} queryBuilder={queryBuilder}></Actions>
+                <GameFooter hub={hub} selected={selected} queryBuilder={queryBuilder}/>
             </div>
         </div>
     )

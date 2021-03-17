@@ -1,0 +1,59 @@
+@import '../../styles/_index.less';
+
+.game-footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .remaining-actions-bar {
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+        align-items: center;
+        margin-top: 5px;
+        margin-left: 10px;
+        width: 100%;
+
+        @media screen and (orientation:portrait) {
+            margin-left: 5px;
+        }
+
+        .remaining-actions-title {
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 5px;
+
+            @media screen and (orientation:portrait) {
+                font-size: 1rem;
+            }
+        }
+
+        .remaining-actions {
+            display: flex;
+            flex-direction: row;
+
+            .remaining-action {
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                background-color: @primary;
+                margin-left: 3px;
+                margin-right: 3px;
+
+                @media screen and (orientation:portrait) {
+                    width: 15px;
+                    height: 15px;
+                }
+            }
+        }
+
+        .end-turn-button {
+            margin-left: 8px;  
+            margin-right: 10px;
+            @media screen and (orientation:portrait) {
+                margin-right: 5px;
+            }
+        }
+    }
+}

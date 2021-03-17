@@ -132,13 +132,13 @@ export class GameService {
         if (game && game.state && game.state.mode !== 'finished') {
             return false;
         }
-    
+
         if (!game) {
             game = await this.createGame(gameId);
         } else {
             game.state = this.createNewGameState();
         }
-        
+
         await this.clearGameStateHistory(game);
         await this.startGame(game);
     }

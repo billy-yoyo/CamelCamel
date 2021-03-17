@@ -8,12 +8,20 @@ interface ButtonProps {
     title: string;
     onclick?: () => void;
     disabled?: boolean;
+    className?: string;
+    alwaysBig?: boolean;
 }
 
-export default ({ style, title, onclick, disabled }: ButtonProps): JSX.Element => {
+export default ({ style, title, onclick, disabled, className, alwaysBig }: ButtonProps): JSX.Element => {
     const classes = ['button', style || 'primary'];
     if (disabled) {
         classes.push('disabled');
+    }
+    if (className) {
+        classes.push(className);
+    }
+    if (alwaysBig) {
+        classes.push('always-big');
     }
 
     const guardedOnClick = () => {

@@ -3,6 +3,8 @@ import { Hub } from '../../util/hub';
 import { undoAction } from '../../service/networkService';
 import { ActionType } from '../../../common/model/game/actionType';
 import UndoIcon from '../../images/undoIcon';
+import './undoButton.less';
+import { isPortrait } from '../../util/mediaQuery';
 
 interface UndoButtonProps {
     hub: Hub;
@@ -20,9 +22,11 @@ export default ({ hub, setProcessing }: UndoButtonProps): JSX.Element => {
             .catch(() => setProcessing(undefined));
     };
 
+    const size = isPortrait() ? '17px' : '29px';
+
     return (
         <div className="undo-button button primary" onClick={undo}>
-            <UndoIcon width="30px" height="30px" fill="white"/>
+            <UndoIcon width={size} height={size} fill="white"/>
         </div>
     )
 };

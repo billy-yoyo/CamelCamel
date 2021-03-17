@@ -56,7 +56,7 @@ export default ({ tile, x, y, selected, setSelected }: TileProps): JSX.Element =
                 {
                     tile.resource ? (
                         <div className="resource" style={{
-                                backgroundColor: resourceColour(tile.resource), 
+                                backgroundColor: resourceColour(tile.resource),
                                 color: resourceLettersColour(tile.resource),
                                 borderColor: resourceLettersColour(tile.resource)
                             }}>

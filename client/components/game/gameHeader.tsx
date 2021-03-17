@@ -4,7 +4,6 @@ import { GameQuery } from '../../util/query';
 import Button from '../button';
 import CamelPiece from '../../images/camelPiece';
 import Triangle from '../../images/triangle';
-import { endTurn } from '../../service/networkService';
 import './gameHeader.less';
 import { Player } from '../../../common/model/game/player';
 
@@ -65,17 +64,14 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
 
     const stealTokens = hub.game.state.stealTokens[hub.player.id];
 
-    const endMyTurn = async () => {
-        await endTurn(hub.game.id, hub.player.id);
-        await hub.refreshGame();
-    };
+    
 
     return (
         <div className="game-header">
             <div className="game-header-row">
                 <div className="tab turn-name">
                     {
-                        hub.game.state.finalTurn && 'The game will end with the next delivery!'
+                        hub.game.state.finalTurn && 'The game will end with the next delivery! '
                     }
                     {
                         query ? query.name : ( isMyTurn ? `It's your turn!` : `It's ${turn}'s turn` )
@@ -109,21 +105,6 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
                             }
                         </div>
                     </div>
-                }
-                { isMyTurn &&
-                <div className="tab remaining-actions">
-                    Actions
-                    <div className="remaining-action-list">
-                        {
-                            new Array(hub.game.state.turn.remainingActions).fill(0).map( (_, i) => (
-                                <div className="remaining-action" key={`remaining-action-${i}`} />
-                            ))
-                        }
-                    </div>
-                </div>
-                }
-                { isMyTurn &&
-                    <Button title="End Turn" onclick={endMyTurn}/>
                 }
             </div>
         </div>

@@ -14,7 +14,7 @@ const DeliveryAnimation = (): HTMLElement => {
 
 export default (target: HTMLElement) => {
     playAnimation({
-        target: target,
+        target,
         animation: DeliveryAnimation(),
         duration: 1100
     });
