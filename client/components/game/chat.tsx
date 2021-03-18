@@ -10,9 +10,10 @@ import { Message } from '../../../common/model/game/message';
 
 interface ChatProps {
     hub: Hub;
+    setFocused: (focused: boolean) => void;
 }
 
-export default ({ hub }: ChatProps): JSX.Element => {
+export default ({ hub, setFocused }: ChatProps): JSX.Element => {
     const [messageBody, setMessageBody] = React.useState<string>('');
 
     const sendMessage = async () => {
@@ -33,7 +34,11 @@ export default ({ hub }: ChatProps): JSX.Element => {
                 }
             </div>
             <div className="chat-box">
-                <Textbox value={messageBody} setValue={setMessageBody} className="chat-box-input" onSubmit={sendMessage}/>
+                <Textbox value={messageBody} 
+                    setValue={setMessageBody} 
+                    className="chat-box-input" 
+                    onSubmit={sendMessage}
+                    onFocusChange={setFocused}/>
                 <div className="button primary chat-box-send" onClick={sendMessage}>
                     <SendIcon size="24px" colour="white"/>
                 </div>

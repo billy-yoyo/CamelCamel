@@ -51,6 +51,7 @@ export default ({ setPage }: GameProps): JSX.Element => {
     const [selected, setSelected] = React.useState<{x: number, y: number}>();
     const [query, setQuery] = React.useState<GameQuery<any>>();
     const [panelToggle, setPanelToggle] = React.useState<boolean>(false);
+    const [chatFocused, setChatFocused] = React.useState<boolean>(false);
 
     const wrappedSetSelected = (pos: {x: number, y: number}) => {
         if (query && query.name === 'select-tile') {
@@ -94,9 +95,13 @@ export default ({ setPage }: GameProps): JSX.Element => {
                 </div>
             }
             <div className={isPortrait() ? 'game-side-panel ' + (panelToggle ? 'open' : '') : "game-side"}>
-                <GameControls hub={hub}/>
+                { (!isPortrait() || !chatFocused) &&
+                    <GameControls hub={hub}/>
+                }
+                { (!isPortrait() || !chatFocused) &&
                 <Players game={game}/>
-                <Chat hub={hub}/>
+                }
+                <Chat hub={hub} setFocused={setChatFocused}/>
             </div>
             <div className="game-main">
                 { query && query.name === 'select-camel' && <SelectCamel query={query}></SelectCamel> }

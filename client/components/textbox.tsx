@@ -9,9 +9,10 @@ interface TextboxProps {
     validator?: (value: string) => string;
     className?: string;
     onSubmit?: () => void;
+    onFocusChange?: (focused: boolean) => void;
 }
 
-export default ({ title, value, uppercase, setValue, validator, className, onSubmit }: TextboxProps): JSX.Element => {
+export default ({ title, value, uppercase, setValue, validator, className, onSubmit, onFocusChange }: TextboxProps): JSX.Element => {
     // don't validate an empty string
     const error = (value && validator) ? validator(value) : undefined;
     const transformValue = (v: string): string => {
@@ -41,7 +42,9 @@ export default ({ title, value, uppercase, setValue, validator, className, onSub
                 value={value}
                 placeholder={title}
                 onChange={e => setValue && setValue(transformValue(e.target.value))}
-                onKeyDown={onSubmit ? onKeyDown : undefined} />
+                onKeyDown={onSubmit ? onKeyDown : undefined}
+                onFocus={() => onFocusChange(true)}
+                onBlur={() => onFocusChange(false)} />
              { error &&
                     <div className="textbox-error">
                         {error}
