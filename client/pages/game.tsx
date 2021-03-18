@@ -18,10 +18,12 @@ import GameFooter from '../components/game/gameFooter';
 import { Player } from '../../common/model/game/player';
 import messageLoop from '../service/messageLoopService';
 import Chat from '../components/game/chat';
+import { HomeButton } from './pageWrapper';
 
 interface GameProps {
     pageData: any;
     setPage: (page: Page, pageData?: any) => void;
+    homeButton: HomeButton;
 }
 
 interface AnimationState {
@@ -40,7 +42,7 @@ const PlayerScoreCounter = ({ player, hub }: { hub: Hub, player: Player }): JSX.
     </div>
 };
 
-export default ({ setPage }: GameProps): JSX.Element => {
+export default ({ setPage, homeButton }: GameProps): JSX.Element => {
     if (!gameInStorage()) {
         setPage('home');
     }
@@ -71,6 +73,12 @@ export default ({ setPage }: GameProps): JSX.Element => {
     const togglePanel = () => {
         setPanelToggle(!panelToggle);
     };
+
+    if (panelToggle) {
+        homeButton.setHandler(togglePanel);
+    } else {
+        homeButton.resetHandler();
+    }
 
     return (
         <div className="game">
