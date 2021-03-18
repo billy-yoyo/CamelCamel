@@ -186,7 +186,7 @@ router.get('/:gameId/updated', safeHandler(async (req, res) => {
         if (checkGame.version !== version) {
             return checkGame;
         }
-    }, 200, 60);
+    }, 200, 300);
 
     if (updatedGame) {
         return res.json({ update: updatedGame.version !== version });
@@ -208,7 +208,7 @@ router.get('/:gameId/messages/new', safeHandler(async (req, res) => {
         if (curVersion > version) {
             return await messageService.getMessages(req.params.gameId, version, curVersion);
         }
-    }, 100, 60) || [];
+    }, 100, 600) || [];
 
     const latestVersion = await messageService.getLatestVersion(req.params.gameId);
 
