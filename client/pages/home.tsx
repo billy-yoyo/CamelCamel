@@ -12,6 +12,7 @@ import { Player } from '../../common/model/game/player';
 import { PlayerColour } from '../../common/model/game/playerColour';
 import { storeGame } from '../repo/gameRepo';
 import { storePlayer } from '../repo/playerRepo';
+import { storeMessages } from '../repo/messageRepo';
 
 interface HomeProps {
     pageData: any;
@@ -47,6 +48,7 @@ const attemptJoinGame = async ({ setPage, gameName, player }: JourneyProps, afte
 
     storeGame(joinResponse.data);
     storePlayer(player);
+    storeMessages({ messages: [], version: 0 });
 
     setPage('game');
 };
