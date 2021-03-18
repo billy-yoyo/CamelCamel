@@ -8,6 +8,7 @@ import { Player } from "../../common/model/game/player";
 import { Turn } from "../../common/model/game/turn";
 import { Action } from "../../common/model/game/action";
 import actionService from "./actionService";
+import messageService from './messageService';
 
 // games will die after a day of inactivity
 const GAME_LIFETIME = 86400000;
@@ -33,6 +34,7 @@ export class GameService {
     async deleteGame(id: string): Promise<void> {
         await gameRepo.set(id, undefined);
         await gameStateHistoryRepo.set(id, undefined);
+        await messageService.deleteAllMessages(id);
     }
 
     async getGame(id: string): Promise<Game> {
