@@ -18,7 +18,9 @@ export class RedisStore implements Store {
         const value = await clientGet(key);
 
         const data = JSON.parse(value);
-        if (template.valid(data)) {
+        if (data === null || data === undefined) {
+            return data;
+        } else if (template.valid(data)) {
             return template.toModel(data);
         } else {
             console.warn(`data ${value} failed to validate, defaulting to undefined`)
@@ -34,6 +36,10 @@ export class RedisStore implements Store {
 
             await clientSet(key, JSON.stringify(data));
         }
+    }
+
+    async delete(key: string) {
+        await clientDel(key);
     }
 
     createTemplateStore<V>(prefix: string, template: Template<V, any>): TemplateStore<V> {

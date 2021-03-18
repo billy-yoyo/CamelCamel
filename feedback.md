@@ -9,6 +9,7 @@
 * move unplaced camel counter next to "place" button
 * move steal tokens next to "steal" button
 * clean up game header
+* change exit button on panel screen for mobile a return button instead
 
 # Resolved
 
@@ -26,3 +27,4 @@
 * add simple score counter to game header
 * add remaining cubes counter to game header
 * clean up action buttons
+* add a chat

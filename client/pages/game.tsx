@@ -16,6 +16,8 @@ import Burger from '../images/burger';
 import { Animation, Hub } from '../util/hub';
 import GameFooter from '../components/game/gameFooter';
 import { Player } from '../../common/model/game/player';
+import messageLoop from '../service/messageLoopService';
+import Chat from '../components/game/chat';
 
 interface GameProps {
     pageData: any;
@@ -62,6 +64,9 @@ export default ({ setPage }: GameProps): JSX.Element => {
     gameLoop.setHub(hub);
     gameLoop.ensureRunning();
 
+    messageLoop.setHub(hub);
+    messageLoop.ensureRunning();
+
     const togglePanel = () => {
         setPanelToggle(!panelToggle);
     };
@@ -91,6 +96,7 @@ export default ({ setPage }: GameProps): JSX.Element => {
             <div className={isPortrait() ? 'game-side-panel ' + (panelToggle ? 'open' : '') : "game-side"}>
                 <GameControls hub={hub}/>
                 <Players game={game}/>
+                <Chat hub={hub}/>
             </div>
             <div className="game-main">
                 { query && query.name === 'select-camel' && <SelectCamel query={query}></SelectCamel> }

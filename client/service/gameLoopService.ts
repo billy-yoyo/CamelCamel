@@ -17,14 +17,14 @@ class GameLoop {
                 const resp = await shouldUpdate(this.hub.game.id, this.hub.game.version);
                 if (resp.data && resp.data.update) {
                     await this.hub.refreshGame();
-                    setTimeout(loop, 1000);
+                    setTimeout(loop, 100);
                 } else {
                     console.warn(`encountered error when syncing game version`);
                     console.warn(resp.error);
-                    setTimeout(loop, 10000);
+                    setTimeout(loop, 1000);
                 }
             } else {
-                setTimeout(loop, 10000);
+                setTimeout(loop, 100);
             }
         };
 

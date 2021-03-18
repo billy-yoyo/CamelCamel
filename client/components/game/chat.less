@@ -1,0 +1,52 @@
+@import '../../styles/_index.less';
+
+.chat-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    .content { 
+        min-height: 0;
+    }
+
+    .chat-messages {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column-reverse;
+        overflow-y: auto;
+        min-height: 100px;
+        
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .chat-box {
+        display: flex;
+        flex-direction: row;
+
+        .chat-box-input {
+            flex-grow: 1;
+
+            input {
+                border-radius: 0;
+                border-top-width: 4px;
+                flex-grow: 1;
+                text-align: start;
+                font-size: 1rem;
+                font-weight: normal;
+
+                &:focus {
+                    border-color: @primary-light;
+                    border-radius: 0;
+                    box-shadow: none;
+                    outline: none;
+                }
+            }
+        }
+
+        .chat-box-send {
+            border-radius: 0;
+        }
+    }
+}

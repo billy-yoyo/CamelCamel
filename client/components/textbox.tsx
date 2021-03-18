@@ -2,14 +2,16 @@ import * as React from 'react';
 import './textbox.less';
 
 interface TextboxProps {
-    title: string;
+    title?: string;
     value?: string;
     uppercase?: boolean;
     setValue?: (value: string) => void;
     validator?: (value: string) => string;
+    className?: string;
+    onSubmit?: () => void;
 }
 
-export default ({ title, value, uppercase, setValue, validator }: TextboxProps): JSX.Element => {
+export default ({ title, value, uppercase, setValue, validator, className, onSubmit }: TextboxProps): JSX.Element => {
     // don't validate an empty string
     const error = (value && validator) ? validator(value) : undefined;
     const transformValue = (v: string): string => {
@@ -20,16 +22,26 @@ export default ({ title, value, uppercase, setValue, validator }: TextboxProps):
         }
     };
 
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            setValue('');
+            onSubmit();
+        }
+    };
+
     return (
-        <div className={"textbox-container" + (error ? ' error' : '')}>
-            <div className="textbox-title">
-                {title}
-            </div>
+        <div className={"textbox-container" + (error ? ' error' : '') + (className ? ` ${className}` : '')}>
+            { title &&
+                <div className="textbox-title">
+                    {title}
+                </div>
+            }
             <input type="text"
                 className={"textbox" + (uppercase ? ' uppercase' : '')}
                 value={value}
                 placeholder={title}
-                onChange={e => setValue && setValue(transformValue(e.target.value))} />
+                onChange={e => setValue && setValue(transformValue(e.target.value))}
+                onKeyDown={onSubmit ? onKeyDown : undefined} />
              { error &&
                     <div className="textbox-error">
                         {error}

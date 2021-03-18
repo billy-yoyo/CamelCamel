@@ -5,6 +5,8 @@ import { Player, TPlayer } from "../../common/model/game/player";
 import { Success, TSuccess } from "../../common/model/response/success";
 import { RemainingActions, TRemainingActions } from "../../common/model/response/remainingActions";
 import { Update, TUpdate } from "../../common/model/response/update";
+import { Messages, TMessages } from "../../common/model/response/messages";
+import { Message, TMessage } from "../../common/model/game/message";
 
 interface RequestOptions {
     method: 'get' | 'post';
@@ -150,5 +152,22 @@ export async function shouldUpdate(gameId: string, gameVersion: number): Promise
         method: 'get',
         path: `/game/${gameId}/updated?version=${gameVersion}`,
         template: TUpdate
+    });
+}
+
+export async function newMessages(gameId: string, messageVersion: number): Promise<Response<Messages>> {
+    return await performRequestWithModel({
+        method: 'get',
+        path: `/game/${gameId}/messages/new?version=${messageVersion}`,
+        template: TMessages
+    });
+}
+
+export async function sendMessage(gameId: string, message: Message): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/messages`,
+        data: TMessage.toTransit(message),
+        template: TSuccess
     });
 }

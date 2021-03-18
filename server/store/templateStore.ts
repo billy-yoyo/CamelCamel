@@ -19,4 +19,8 @@ export default class TemplateStore<V> {
     async set(key: string, value: V) {
         return await this.store.set(this.prefix + key, value, this.template);
     }
+
+    async delete(key: string) {
+        return await this.store.delete(this.prefix + key);
+    }
 }

@@ -1,11 +1,14 @@
 import * as express from 'express';
 import gameService from '../service/gameService';
+import messageService from '../service/messageService';
 import { TGame } from '../../common/model/game/game';
 import { TPlayer } from '../../common/model/game/player';
 import errors from '../errors';
 import { TAction } from '../../common/model/game/action';
 import safeHandler from './helper/safeHandler';
 import asyncRepeat from '../util/asyncRepeat';
+import { TMessages } from '../../common/model/response/messages';
+import { Message, TMessage } from '../../common/model/game/message';
 
 const router = express.Router();
 
@@ -183,13 +186,53 @@ router.get('/:gameId/updated', safeHandler(async (req, res) => {
         if (checkGame.version !== version) {
             return checkGame;
         }
-    }, 1000, 60);
+    }, 200, 60);
 
     if (updatedGame) {
         return res.json({ update: updatedGame.version !== version });
     } else {
         return res.json({ update: false });
     }
+}));
+
+router.get('/:gameId/messages/new', safeHandler(async (req, res) => {
+    const version = asInt(req.query.version as string);
+
+    if (version === null) {
+        return errors.badRequest(res, `Invalid or missing version ${req.query.version}`);
+    }
+
+    const newMessages = await asyncRepeat(async () => {
+        const curVersion = await messageService.getLatestVersion(req.params.gameId);
+
+        if (curVersion > version) {
+            return await messageService.getMessages(req.params.gameId, version, curVersion);
+        }
+    }, 100, 60) || [];
+
+    const latestVersion = await messageService.getLatestVersion(req.params.gameId);
+
+    return res.json(TMessages.toTransit({
+        messages: newMessages,
+        version: latestVersion
+    }));
+}));
+
+router.post('/:gameId/messages', safeHandler(async (req, res) => {
+    if (!TMessage.valid(req.body)) {
+        return errors.badRequest(res, 'Invalid message object');
+    }
+
+    const message = TMessage.toModel(req.body);
+    const game = await gameService.getGame(req.params.gameId);
+
+    if (!game) {
+        return errors.notFound(res, `No game with id ${req.params.gameId} found`);
+    }
+
+    await messageService.addMessage(req.params.gameId, message);
+
+    return res.json({ success: true });
 }));
 
 export default router;

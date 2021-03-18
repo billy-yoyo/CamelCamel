@@ -64,7 +64,7 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
 
     const stealTokens = hub.game.state.stealTokens[hub.player.id];
 
-    
+
 
     return (
         <div className="game-header">
