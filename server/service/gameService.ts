@@ -9,6 +9,9 @@ import { Turn } from "../../common/model/game/turn";
 import { Action } from "../../common/model/game/action";
 import actionService from "./actionService";
 import messageService from './messageService';
+import * as ai from '../ai';
+import { PlayerColour } from "../../common/model/game/playerColour";
+import { PlayerType } from "../../common/model/game/playerType";
 
 // games will die after a day of inactivity
 const GAME_LIFETIME = 86400000;
@@ -103,7 +106,7 @@ export class GameService {
 
         // if the player isn't already in the game when it starts, then they can't join late
         if (game.state.mode !== 'creating') {
-            return `Game ${game} is already in progress`;
+            return `Game ${game.id} is already in progress`;
         }
 
         if (game.players.some(
@@ -176,13 +179,17 @@ export class GameService {
             game.state.mode = 'playing';
             game.state.turn = new Turn(
                 game.players[0].id,
-                4,
+                1,
+                1,
                 []
             );
 
             game.version++;
             await gameRepo.set(game.id, game);
             await this.checkGameState(game);
+
+            this.schedulePlayAiTurnIfNecessary(game);
+
             return true;
         } else if (game.state.mode === 'playing') {
             return true;
@@ -221,7 +228,6 @@ export class GameService {
 
         game.version++;
         await gameRepo.set(game.id, game);
-
         await this.checkGameState(game);
         return game.state.turn.remainingActions;
     }
@@ -242,12 +248,22 @@ export class GameService {
         }
 
         const nextIndex = index + 1 >= game.players.length ? 0 : index + 1;
+        const lastTurn = game.state.turn;
+        const maxActions = Math.min(4, lastTurn.maxActions + 1);
 
-        game.state.turn = new Turn(game.players[nextIndex].id, 4, []);
+        game.state.turn = new Turn(
+            game.players[nextIndex].id,
+            maxActions,
+            maxActions,
+            []
+        );
 
         game.version++;
         await gameRepo.set(game.id, game);
         await this.clearGameStateHistory(game);
+
+        this.schedulePlayAiTurnIfNecessary(game);
+
         return undefined;
     }
 
@@ -343,6 +359,107 @@ export class GameService {
 
     async clearGameStateHistory(game: Game): Promise<void> {
         await gameStateHistoryRepo.set(game.id, []);
+    }
+
+    async addAiPlayer(game: Game): Promise<string> {
+        if (game.players.length >= 4) {
+            return 'Game is already full';
+        }
+
+        if (game.state.mode !== 'creating') {
+            return `Game ${game.id} is already in progress`;
+        }
+
+        const aiPlayerNames = [
+            'Bot Alpha',
+            'Bot Beta',
+            'Bot Gamma',
+            'Bot Delta',
+            'Bot Theta'
+        ].filter(name => game.players.every(player => player.id !== name));
+
+        const colours = ['black', 'blue', 'green', 'yellow']
+            .filter(colour => game.players.every(player => player.colour !== colour)) as PlayerColour[];
+
+        const aiPlayer: Player = new Player(
+            aiPlayerNames[Math.floor(Math.random() * aiPlayerNames.length)],
+            colours[Math.floor(Math.random() * colours.length)],
+            'medium-ai'
+        );
+
+        game.players.push(aiPlayer);
+        game.version++;
+        await gameRepo.set(game.id, game);
+        return undefined;
+    }
+
+    async kickAiPlayer(game: Game, player: Player): Promise<string> {
+        if (game.state.mode !== 'creating') {
+            return `Game ${game.id} is already in progress`;
+        }
+
+        if (player.isHuman) {
+            return `Player ${player.id} is a human`;
+        }
+
+        game.players = game.players.filter(p => p.id !== player.id);
+        game.version++;
+        await gameRepo.set(game.id, game);
+        return undefined;
+    }
+
+    async setAiDifficulty(game: Game, player: Player, difficulty: PlayerType): Promise<string> {
+        if (game.state.mode !== 'creating') {
+            return `Game ${game.id} is already in progress`;
+        }
+
+        if (player.isHuman) {
+            return `Player ${player.id} is a human`
+        }
+
+        if (difficulty !== 'easy-ai' && difficulty !== 'medium-ai' && difficulty !== 'hard-ai') {
+            return `Cannot set ai type to a non-ai type`;
+        }
+
+        player.type = difficulty;
+        game.version++;
+        await gameRepo.set(game.id, game);
+        return undefined;
+    }
+
+    schedulePlayAiTurnIfNecessary(oldGame: Game): void {
+        if (oldGame.state.mode !== 'playing') {
+            return;
+        }
+
+        const aiPlayer = oldGame.players.find(player => player.id === oldGame.state.turn.playerId);
+        if (aiPlayer && !aiPlayer.isHuman) {
+            setTimeout(async () => {
+                // in case game has somehow changed since the delay
+                const game = await this.getGame(oldGame.id);
+                const pauseTurn = async () => {
+                    game.version++;
+                    await gameRepo.set(game.id, game);
+                    await this.checkGameState(game);
+
+                    await new Promise(r => setTimeout(r, 1000));
+                };
+
+                try {
+                    const gameFinished = await ai.playTurn(aiPlayer, game, game.state.turn.remainingActions, pauseTurn)
+                    if (gameFinished) {
+                        await this.endGame(game);
+                        game.version++;
+                        await gameRepo.set(game.id, game);
+                    }
+                } catch(e) {
+                    console.warn('failed to process ai turn for some reason:');
+                    console.error(e);
+                }
+
+                await this.endTurn(game, aiPlayer);
+            }, 1000);
+        }
     }
 }
 

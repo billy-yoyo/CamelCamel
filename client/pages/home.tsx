@@ -13,6 +13,8 @@ import { PlayerColour } from '../../common/model/game/playerColour';
 import { storeGame } from '../repo/gameRepo';
 import { storePlayer } from '../repo/playerRepo';
 import { storeMessages } from '../repo/messageRepo';
+import gameLoop from '../service/gameLoopService';
+import messageLoop from '../service/messageLoopService';
 
 interface HomeProps {
     pageData: any;
@@ -91,7 +93,7 @@ export default ({ setPage, pageData }: HomeProps): JSX.Element => {
 
     const colours: PlayerColour[] = ['black', 'blue', 'green', 'yellow'];
 
-    const createJourneyProps = (): JourneyProps => ({ setPage, gameName, player: new Player(playerName, playerColour as PlayerColour) });
+    const createJourneyProps = (): JourneyProps => ({ setPage, gameName, player: new Player(playerName, playerColour as PlayerColour, 'human') });
     const withJourneyProps = (func: (props: JourneyProps) => any) => (() => func(createJourneyProps()))
     const validatedWithJourneyProps = (func: (props: JourneyProps) => any) => {
         if (gameAndPlayerNamesAreValid(gameName, playerName)) {
@@ -101,6 +103,9 @@ export default ({ setPage, pageData }: HomeProps): JSX.Element => {
 
     const onCreateGame = validatedWithJourneyProps(attemptCreateGame);
     const onJoinGame = validatedWithJourneyProps(attemptJoinGame);
+
+    gameLoop.stop();
+    messageLoop.stop();
 
     return (
         <div className="home">

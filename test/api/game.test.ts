@@ -35,7 +35,7 @@ test('can join game', async () => {
     await gameApi.createGame(id)
         .is2xx().assert();
     
-    await gameApi.joinGame(id, new Player(name, colour))
+    await gameApi.joinGame(id, new Player(name, colour, true))
         .is2xx().model({  
             players: [ 
                 { id: name, colour } 
@@ -48,7 +48,7 @@ test('cannot join nonexistant game', async () => {
     const name = 'example-player';
     const colour = 'blue';
 
-    await gameApi.joinGame(id, new Player(name, colour))
+    await gameApi.joinGame(id, new Player(name, colour, true))
         .isNot2xx().assert();
 });
 
@@ -60,7 +60,7 @@ test('can start a game', async () => {
     await gameApi.createGame(id)
         .is2xx().assert();
 
-    await gameApi.joinGame(id, new Player(name, colour))
+    await gameApi.joinGame(id, new Player(name, colour, true))
         .is2xx().assert();
 
     await gameApi.startGame(id)
@@ -78,7 +78,7 @@ test('can use the place action', async() => {
     await gameApi.createGame(id)
         .is2xx().assert();
 
-    await gameApi.joinGame(id, new Player(name, colour))
+    await gameApi.joinGame(id, new Player(name, colour, true))
         .is2xx().assert();
     
     await gameApi.startGame(id)

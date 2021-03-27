@@ -7,7 +7,7 @@ import { PlayerColour } from "../../common/model/game/playerColour";
 
 const MAX_CAMELS = 5;
 
-interface ActionResult {
+export interface ActionResult {
     message?: string;
     cost?: number;
     // returns whether or not the game should end as a result of this action

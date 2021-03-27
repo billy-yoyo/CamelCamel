@@ -9,6 +9,7 @@ import safeHandler from './helper/safeHandler';
 import asyncRepeat from '../util/asyncRepeat';
 import { TMessages } from '../../common/model/response/messages';
 import { Message, TMessage } from '../../common/model/game/message';
+import { TPlayerType } from '../../common/model/game/playerType';
 
 const router = express.Router();
 
@@ -231,6 +232,72 @@ router.post('/:gameId/messages', safeHandler(async (req, res) => {
     }
 
     await messageService.addMessage(req.params.gameId, message);
+
+    return res.json({ success: true });
+}));
+
+router.post('/:gameId/ai', safeHandler(async (req, res) => {
+    const game = await gameService.getGame(req.params.gameId);
+
+    if (!game) {
+        return errors.notFound(res, `No game with id ${req.params.gameId} found`);
+    }
+
+    const result = await gameService.addAiPlayer(game);
+
+    if (result) {
+        return errors.badRequest(res, result);
+    }
+
+    return res.json({ success: true });
+}));
+
+router.delete('/:gameId/ai', safeHandler(async (req, res) => {
+    const game = await gameService.getGame(req.params.gameId);
+
+    if (!game) {
+        return errors.notFound(res, `No game with id ${req.params.gameId} found`);
+    }
+
+    const player = game.players.find(p => p.id === req.query.playerId);
+
+    if (!player) {
+        return errors.notFound(res, `No player with id ${req.query.playerId} is in game ${req.params.gameId}`);
+    }
+
+    const result = await gameService.kickAiPlayer(game, player);
+
+    if (result) {
+        return errors.badRequest(res, result);
+    }
+
+    return res.json({ success: true });
+}));
+
+router.post('/:gameId/ai/difficulty', safeHandler(async (req, res) => {
+    const game = await gameService.getGame(req.params.gameId);
+
+    if (!game) {
+        return errors.notFound(res, `No game with id ${req.params.gameId} found`);
+    }
+
+    const player = game.players.find(p => p.id === req.query.playerId);
+
+    if (!player) {
+        return errors.notFound(res, `No player with id ${req.query.playerId} is in game ${req.params.gameId}`);
+    }
+
+    if (!TPlayerType.valid(req.query.difficulty)) {
+        return errors.badRequest(res, `${req.query.difficulty} is not a valid player type`);
+    }
+
+    const difficulty = TPlayerType.toModel(req.query.difficulty);
+
+    const result = await gameService.setAiDifficulty(game, player, difficulty);
+
+    if (result) {
+        return errors.badRequest(res, result);
+    }
 
     return res.json({ success: true });
 }));

@@ -7,11 +7,15 @@ import { RemainingActions, TRemainingActions } from "../../common/model/response
 import { Update, TUpdate } from "../../common/model/response/update";
 import { Messages, TMessages } from "../../common/model/response/messages";
 import { Message, TMessage } from "../../common/model/game/message";
+import { PlayerType } from "../../common/model/game/playerType";
+
+type Signal = (aborter: () => void) => void;
 
 interface RequestOptions {
-    method: 'get' | 'post';
+    method: 'get' | 'post' | 'delete';
     path: string;
     data?: any;
+    signal?: Signal;
 }
 
 interface ResponseError {
@@ -64,6 +68,10 @@ async function performRequest(opts: RequestOptions): Promise<any> {
             xhr.send(JSON.stringify(opts.data))
         } else {
             xhr.send();
+        }
+
+        if (opts.signal) {
+            opts.signal(() => xhr.abort());
         }
     });
 }
@@ -147,19 +155,21 @@ export async function endTurn(gameId: string, playerId: string): Promise<Respons
     });
 }
 
-export async function shouldUpdate(gameId: string, gameVersion: number): Promise<Response<Update>> {
+export async function shouldUpdate(gameId: string, gameVersion: number, signal?: Signal): Promise<Response<Update>> {
     return await performRequestWithModel({
         method: 'get',
         path: `/game/${gameId}/updated?version=${gameVersion}`,
-        template: TUpdate
+        template: TUpdate,
+        signal
     });
 }
 
-export async function newMessages(gameId: string, messageVersion: number): Promise<Response<Messages>> {
+export async function newMessages(gameId: string, messageVersion: number, signal?: Signal): Promise<Response<Messages>> {
     return await performRequestWithModel({
         method: 'get',
         path: `/game/${gameId}/messages/new?version=${messageVersion}`,
-        template: TMessages
+        template: TMessages,
+        signal
     });
 }
 
@@ -168,6 +178,30 @@ export async function sendMessage(gameId: string, message: Message): Promise<Res
         method: 'post',
         path: `/game/${gameId}/messages`,
         data: TMessage.toTransit(message),
+        template: TSuccess
+    });
+}
+
+export async function addAiPlayer(gameId: string): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/ai`,
+        template: TSuccess
+    });
+}
+
+export async function kickAiPlayer(gameId: string, playerId: string): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'delete',
+        path: `/game/${gameId}/ai?playerId=${encodeURIComponent(playerId)}`,
+        template: TSuccess
+    });
+}
+
+export async function changeAiDifficulty(gameId: string, playerId: string, difficulty: PlayerType): Promise<Response<Success>> {
+    return await performRequestWithModel({
+        method: 'post',
+        path: `/game/${gameId}/ai/difficulty?playerId=${encodeURIComponent(playerId)}&difficulty=${encodeURIComponent(difficulty)}`,
         template: TSuccess
     });
 }

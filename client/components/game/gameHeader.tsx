@@ -30,7 +30,7 @@ export default ({ hub, query }: GameHeaderProps): JSX.Element => {
         return (
             <div className="game-header">
                 <div className="game-header-row">
-                    Game finished!
+                    Game finished! <br/>
                     {
                         winners.length <= 0
                             ? 'There were no winners!'

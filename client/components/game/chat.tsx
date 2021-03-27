@@ -34,9 +34,9 @@ export default ({ hub, setFocused }: ChatProps): JSX.Element => {
                 }
             </div>
             <div className="chat-box">
-                <Textbox value={messageBody} 
-                    setValue={setMessageBody} 
-                    className="chat-box-input" 
+                <Textbox value={messageBody}
+                    setValue={setMessageBody}
+                    className="chat-box-input"
                     onSubmit={sendMessage}
                     onFocusChange={setFocused}/>
                 <div className="button primary chat-box-send" onClick={sendMessage}>

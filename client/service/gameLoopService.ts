@@ -4,6 +4,7 @@ import { shouldUpdate } from './networkService';
 class GameLoop {
     private hub: Hub;
     private running: boolean = false;
+    private abort: () => void = () => undefined;
 
     setHub(hub: Hub) {
         this.hub = hub;
@@ -13,9 +14,19 @@ class GameLoop {
         this.running = true;
 
         const loop = async () => {
+            if (!this.running) {
+                return;
+            }
+
             if (this.hub?.game) {
-                const resp = await shouldUpdate(this.hub.game.id, this.hub.game.version);
-                if (resp.data && resp.data.update) {
+                const resp = await shouldUpdate(
+                    this.hub.game.id,
+                    this.hub.game.version,
+                    (aborter) => { this.abort = aborter; }
+                );
+                if (!this.running) {
+                    return;
+                } else if (resp.data && resp.data.update) {
                     await this.hub.refreshGame();
                     setTimeout(loop, 100);
                 } else {
@@ -35,6 +46,11 @@ class GameLoop {
         if (!this.running) {
             this.start();
         }
+    }
+
+    stop() {
+        this.abort();
+        this.running = false;
     }
 }
 

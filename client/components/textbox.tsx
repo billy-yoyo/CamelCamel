@@ -43,8 +43,8 @@ export default ({ title, value, uppercase, setValue, validator, className, onSub
                 placeholder={title}
                 onChange={e => setValue && setValue(transformValue(e.target.value))}
                 onKeyDown={onSubmit ? onKeyDown : undefined}
-                onFocus={() => onFocusChange(true)}
-                onBlur={() => onFocusChange(false)} />
+                onFocus={onFocusChange ? (() => onFocusChange(true)) : undefined}
+                onBlur={onFocusChange ? (() => onFocusChange(false)) : undefined} />
              { error &&
                     <div className="textbox-error">
                         {error}

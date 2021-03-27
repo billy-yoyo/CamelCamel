@@ -23,6 +23,9 @@ const GameInfo = ({ hub }: GameControlsProps): JSX.Element => {
 };
 
 export default ({ hub }: GameControlsProps): JSX.Element => {
+    if (!hub.game) {
+        return <div></div>
+    }
 
     const startGame = async () => {
         await networkService.startGame(hub.game.id);
@@ -34,16 +37,25 @@ export default ({ hub }: GameControlsProps): JSX.Element => {
         await hub.refreshGame();
     };
 
+    const addComputerPlayer = async () => {
+        await networkService.addAiPlayer(hub.game.id);
+        await hub.refreshGame();
+    };
+
     return (
         <Panel title={`Game: ${hub.game.id}`} className="game">
             <div className="buttons">
-                {
-                    hub.game.state.mode === 'creating'
-                        ? <Button title="Start Game" onclick={startGame} />
-                        : ( hub.game.state.mode === 'playing'
-                            ? <GameInfo hub={hub}/>
-                            : <Button title="Restart Game" onclick={restartGame} />
-                        )
+                { hub.game.state.mode === 'creating' &&
+                    <Button title="Start Game" onclick={startGame} />
+                }
+                { hub.game.state.mode === 'creating' &&
+                    <Button title="Add Computer" onclick={addComputerPlayer} className="add-computer" />
+                }
+                { hub.game.state.mode === 'playing' &&
+                    <GameInfo hub={hub}/>
+                }
+                { hub.game.state.mode === 'finished' &&
+                    <Button title="Restart Game" onclick={restartGame} />
                 }
             </div>
         </Panel>

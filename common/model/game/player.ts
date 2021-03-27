@@ -1,9 +1,9 @@
 import T from 'tsplate';
 import { GameState } from './gameState';
 import { PlayerColour, TPlayerColour } from './playerColour';
-import { Resource } from './resource';
+import { PlayerType, TPlayerType } from './playerType';
 
-@T.constructor("id", "colour")
+@T.constructor("id", "colour", "type")
 export class Player {
     @T.template(T.String)
     public id: string;
@@ -11,9 +11,17 @@ export class Player {
     @T.template(TPlayerColour)
     public colour: PlayerColour;
 
-    constructor(id: string, colour: PlayerColour) {
+    @T.template(TPlayerType)
+    public type: PlayerType;
+
+    constructor(id: string, colour: PlayerColour, type: PlayerType) {
         this.id = id;
         this.colour = colour;
+        this.type = type;
+    }
+
+    get isHuman(): boolean {
+        return this.type === 'human';
     }
 
     calculateScore(state: GameState) {

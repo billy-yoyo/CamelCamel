@@ -5,6 +5,7 @@ import { newMessages, shouldUpdate } from './networkService';
 class MessageLoop {
     private hub: Hub;
     private running: boolean = false;
+    private abort: () => void = () => undefined;
 
     setHub(hub: Hub) {
         this.hub = hub;
@@ -14,12 +15,21 @@ class MessageLoop {
         this.running = true;
 
         const loop = async () => {
+            if (!this.running) {
+                return;
+            }
+
             if (this.hub?.game) {
-                const resp = await newMessages(this.hub.game.id,  this.hub?.messages?.version || 0);
-                console.log(resp);
-                if (resp.data) {
+                const resp = await newMessages(
+                    this.hub.game.id,
+                    this.hub?.messages?.version || 0,
+                    (aborter) => this.abort = aborter
+                );
+                if (!this.running) {
+                    return;
+                } else if (resp.data) {
                     if (resp.data.messages.length) {
-                        
+
                         const unsortedMessages = this.hub.messages ? this.hub.messages.messages.concat(resp.data.messages) : resp.data.messages;
                         const sortedMessages = unsortedMessages.sort((a, b) => b.timeSent - a.timeSent);
 
@@ -46,6 +56,11 @@ class MessageLoop {
         if (!this.running) {
             this.start();
         }
+    }
+
+    stop() {
+        this.abort();
+        this.running = false;
     }
 }
 

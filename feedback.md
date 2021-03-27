@@ -9,7 +9,7 @@
 * move unplaced camel counter next to "place" button
 * move steal tokens next to "steal" button
 * clean up game header
-* change exit button on panel screen for mobile a return button instead
+* better error reporting
 
 # Resolved
 
@@ -28,3 +28,9 @@
 * add remaining cubes counter to game header
 * clean up action buttons
 * add a chat
+* change exit button on panel screen for mobile a return button instead
+
+
+# AI
+
+* if within 1 jump of end, but not enough actions to jump within 1 turn, then don't pickup
